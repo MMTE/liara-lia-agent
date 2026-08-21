@@ -12,6 +12,8 @@ interface Stats {
 }
 
 export default function UsageMeter() {
+  if (process.env.NEXT_PUBLIC_USAGE_METER !== "1") return null;
+
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
