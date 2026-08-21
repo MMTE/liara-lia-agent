@@ -14,6 +14,11 @@ const PRODUCT_LABELS = {
   dns: "DNS",
   mail: "ایمیل",
   iaas: "سرور ابری",
+  "one-click-apps": "اپ‌های آماده",
+  references: "منابع و مراجع",
+  "email-server": "سرور ایمیل",
+  mirrors: "آینه‌های دانلود",
+  "dns-management-system": "مدیریت DNS",
 };
 const API_REF_LABEL = "مرجع API (API Reference)";
 
