@@ -33,7 +33,7 @@ approval — executes them.
 | Criterion | Pts | How we earn it |
 |---|---|---|
 | Response quality & correctness | 80 | Hybrid retrieval (BM25+vector) over full docs corpus; citations on every docs claim; refusal rule when confidence low; Persian+English answers |
-| UI & UX | 55 | RTL Persian-first chat, streaming, code highlighting, citation chips, tool-activity timeline, one-click demo scenarios, connect panel, usage meter |
+| UI & UX | 55 | RTL Persian-first chat, streaming, code highlighting, citation chips, tool-activity timeline, one-click demo scenarios, connect panel, usage meter (debug-gated per ADR-0009: hidden unless NEXT_PUBLIC_USAGE_METER=1) |
 | Agentic & personalization | 50 | Intent routing; observe→diagnose→plan→approve→act→verify loops; pinned app context for follow-ups; clarifying questions; next-step suggestions |
 | Security & reliability | 50 | Rate limiting, memory-only session tokens, log redaction, output truncation, tool-loop caps, provider fallback, /stats monitoring, structured logs |
 | Deployment on Liara | 40 | Single Next.js+Eve Node app deployed via Liara platform; health endpoint; env-config |
@@ -151,7 +151,10 @@ mechanism covers it (ADR-0007). Never silent mutations; destructive ops
 - Tool-activity timeline per assistant message (collapsible).
 - 8 one-click demo scenarios (see §6).
 - Connect-Liara panel (paste token; stored server-side in session memory only).
-- Usage meter (tokens/request/model) + /stats monitoring page.
+- Usage meter (tokens/requests/errors) — **debug-only** (ADR-0009): strip + its 15s
+  `/api/stats` polling run only when `NEXT_PUBLIC_USAGE_METER=1`; production/demo
+  renders nothing and issues zero stats requests. `/stats` endpoint itself stays for
+  server-side monitoring/smoke.
 - About modal: architecture + security notes for judges.
 
 ### 4.7 Chrome extension (extension/)
