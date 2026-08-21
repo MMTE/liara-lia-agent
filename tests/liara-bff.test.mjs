@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { sessionFromRequest, liaraGet } from "../src/lib/liara-bff.js";
+import { configRows } from "../src/components/console/types.ts";
 import { set as setSession, remove as removeSession } from "../src/lib/session-store.js";
 
 process.env.LIARA_API_BASE = "https://liara.test.local";
@@ -12,6 +13,27 @@ function req(cookie) {
   const headers = cookie ? { cookie } : {};
   return new Request("https://app.test.local/api/liara/apps", { headers });
 }
+
+test("configRows: spec-shaped detail with node {_id, IP} renders scalar values only", () => {
+  // spec ProjectAllDetails.project.node is an OBJECT — the detail view must
+  // unwrap it (IP → _id → hidden) so no raw object reaches the React tree.
+  const rows = configRows({
+    project_id: "shop-api",
+    type: "node",
+    planID: "standard",
+    scale: 1,
+    hourlyPrice: 150,
+    reservedDiskSpace: 1024,
+    created_at: "2026-01-05T08:00:00.000Z",
+    node: { _id: "node-42", IP: "10.0.0.9" },
+  });
+  assert.ok(rows.every(([, v]) => typeof v === "string"));
+  assert.deepEqual(rows.find(([k]) => k === "گره"), ["گره", "10.0.0.9"]);
+  // node without IP falls back to _id; empty node object drops the row
+  assert.deepEqual(configRows({ node: { _id: "node-7" } }).find(([k]) => k === "گره"), ["گره", "node-7"]);
+  assert.equal(configRows({ node: {} }).some(([k]) => k === "گره"), false);
+  assert.equal(configRows({}).some(([k]) => k === "گره"), false);
+});
 
 test("sessionFromRequest: no cookie / no sid → null", async () => {
   assert.equal(await sessionFromRequest(req(null)), null);

@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertOctagon, ArrowRight, GitBranch, Settings } from "lucide-react";
-import { sortedReleases, type LiaraProject, type LiaraReleases } from "./types";
+import { configRows, formatWhen, sortedReleases, type LiaraProject, type LiaraReleases } from "./types";
 
 /** Release state → Persian label + badge color (spec `state` field). */
 function releaseBadge(state: string | undefined): { label: string; cls: string } {
@@ -9,27 +9,6 @@ function releaseBadge(state: string | undefined): { label: string; cls: string }
   if (state === "ready") return { label: "موفق", cls: "bg-emerald-50 text-emerald-600" };
   if (state === "building") return { label: "در حال ساخت", cls: "bg-amber-50 text-amber-600" };
   return { label: state ?? "نامشخص", cls: "bg-zinc-100 text-zinc-600" };
-}
-
-/** ISO createdAt → deterministic `YYYY-MM-DD HH:mm` (pure string ops, no ICU). */
-function formatWhen(value: string | null | undefined): string {
-  if (!value) return "";
-  const s = String(value);
-  return s.length >= 16 ? `${s.slice(0, 10)} ${s.slice(11, 16)}` : s;
-}
-
-/** Config-summary rows rendered from the spec ProjectAllDetails fields. */
-function configRows(app: LiaraProject): [string, string][] {
-  const rows: [string, string, boolean?][] = [
-    ["پلتفرم", app.type ?? ""],
-    ["پلن", app.planID ?? ""],
-    ["مقیاس", app.scale !== undefined ? String(app.scale) : ""],
-    ["گره", app.node ?? ""],
-    ["قیمت ساعتی", app.hourlyPrice !== undefined ? String(app.hourlyPrice) : ""],
-    ["فضای دیسک", app.reservedDiskSpace !== undefined ? String(app.reservedDiskSpace) : ""],
-    ["ساخته‌شده", formatWhen(app.created_at)],
-  ];
-  return rows.filter(([k, v]) => v !== "") as [string, string][];
 }
 
 interface AppDetailProps {

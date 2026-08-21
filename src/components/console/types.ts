@@ -15,7 +15,8 @@ export interface LiaraProject {
   created_at?: string;
   isDeployed?: boolean;
   hourlyPrice?: number;
-  node?: string;
+  /** spec: object {_id, IP} — rendered defensively (IP → _id → hidden) */
+  node?: { _id?: string; IP?: string };
   reservedDiskSpace?: number;
 }
 
@@ -57,4 +58,29 @@ export function sortedReleases(releases: LiaraReleases | null | undefined): Liar
   const list = releases?.releases;
   if (!Array.isArray(list)) return [];
   return [...list].sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
+}
+
+/**
+ * Config-summary rows for the detail view. Values must be plain strings —
+ * spec object fields (e.g. node {_id, IP}) are unwrapped defensively so a
+ * populated payload can never put a raw object into the React tree.
+ */
+export function configRows(app: LiaraProject): [string, string][] {
+  const rows: [string, string][] = [
+    ["پلتفرم", app.type ?? ""],
+    ["پلن", app.planID ?? ""],
+    ["مقیاس", app.scale !== undefined ? String(app.scale) : ""],
+    ["گره", app.node ? (app.node.IP ?? app.node._id ?? "") : ""],
+    ["قیمت ساعتی", app.hourlyPrice !== undefined ? String(app.hourlyPrice) : ""],
+    ["فضای دیسک", app.reservedDiskSpace !== undefined ? String(app.reservedDiskSpace) : ""],
+    ["ساخته‌شده", formatWhen(app.created_at)],
+  ];
+  return rows.filter(([, v]) => v !== "");
+}
+
+/** ISO createdAt → deterministic `YYYY-MM-DD HH:mm` (pure string ops, no ICU). */
+export function formatWhen(value: string | null | undefined): string {
+  if (!value) return "";
+  const s = String(value);
+  return s.length >= 16 ? `${s.slice(0, 10)} ${s.slice(11, 16)}` : s;
 }

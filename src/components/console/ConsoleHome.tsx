@@ -122,10 +122,17 @@ export function ConsoleHome() {
     void loadApps();
   }, [loadApps]);
 
+  // Latest detail fetch wins: a new selection (or going back) aborts the
+  // previous request so a slow stale response can't overwrite the view.
+  const detailAbort = useRef<AbortController | null>(null);
   const selectApp = useCallback(async (name: string) => {
     setDetailError(null);
+    detailAbort.current?.abort();
+    const ctrl = new AbortController();
+    detailAbort.current = ctrl;
     try {
-      const res = await fetch(`/api/liara/apps/${encodeURIComponent(name)}`);
+      const res = await fetch(`/api/liara/apps/${encodeURIComponent(name)}`, { signal: ctrl.signal });
+      if (ctrl.signal.aborted) return;
       if (res.status === 401) {
         setPhase("demo");
         setSelection(null);
@@ -133,14 +140,15 @@ export function ConsoleHome() {
       }
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as { error?: string } | null;
-        setDetailError(body?.error ?? "دریافت جزئیات برنامه ناموفق بود.");
+        if (!ctrl.signal.aborted) setDetailError(body?.error ?? "دریافت جزئیات برنامه ناموفق بود.");
         return;
       }
       const data = (await res.json()) as AppDetailData;
+      if (ctrl.signal.aborted) return;
       // spec getAppByName body is ProjectAllDetails — project fields live under .project
       setSelection({ name, app: data.app?.project ?? null, releases: data.releases ?? null });
     } catch {
-      setDetailError("ارتباط با سرور برقرار نشد.");
+      if (!ctrl.signal.aborted) setDetailError("ارتباط با سرور برقرار نشد.");
     }
   }, []);
 
@@ -245,6 +253,7 @@ export function ConsoleHome() {
               releases={selection.releases}
               onAsk={ask}
               onBack={() => {
+                detailAbort.current?.abort();
                 setSelection(null);
                 setDetailError(null);
               }}
