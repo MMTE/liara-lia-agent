@@ -31,7 +31,7 @@
 | 1 Eve spike | ✅ done | ADR-0007 written+verified; tasks 6–7 revised to OpenAPI connections + native HITL (`aaed462`) |
 | 2 Persian/BM25/RRF | ✅ done | `fea2ae1` — 12 tests; fixed plan's digit-normalization precedence bug |
 | 3 MDX cleaner/chunker | ✅ done | `1e25420` — 6 tests; JSX headings → markdown. Payload-attr bug (Tabs/Step self-closing attrs dropped → 458/1143 pages empty) found by CorpusBuilder; being fixed with regression tests |
-| 4 Corpus + embeddings | 🔄 running | CorpusBuilder: corpus half (embeddings deferred until Liara AI key) |
+| 4 Corpus + embeddings | ◐ corpus done | `b08515e` — 4,260 chunks (3,748 guides + 512 api-ref), 6.2 MB, idempotent; payload-attr cleaner bug fixed (+933 chunks); embeddings half blocked on Liara AI key |
 | 5 Retrieval tools | ⏳ next | after 4 |
 | 6 OpenAPI connections | ✅ done | `01aeb5c` — vendored specs (41+18 ops, 13 allowed), approval policy, per-principal auth resolver (app-principal fallback keeps demo token reachable), 21/21 tests |
 | 7 HITL verification | ⏳ after 6 | needs DEMO_LIARA_TOKEN (user to provide) |
