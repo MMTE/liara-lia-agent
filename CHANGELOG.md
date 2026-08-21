@@ -67,3 +67,7 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
   api — 429 at request 31), POST /api/connect validates token via Liara API and
   stamps sid→user-principal (channel AuthFn), health/stats endpoints, live
   usage meter fed from stream events, connect + about panels, hydration guard.
+- 2026-08-21 — Task 12 done: MV3 extension (✦ bubble → iframe ?embed=1),
+  scripts/smoke.mjs green (3 scenarios: settled + citations + 4/4/2 tool calls),
+  README with judge guide, prod build green (standalone + data tracing).
+  Remaining: deploy (needs Liara login), HITL live verify + embeddings (user keys).
