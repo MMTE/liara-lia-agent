@@ -1,13 +1,7 @@
 "use client";
 
-import { Check, FileText, Loader2, PenLine, Search } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import type { ToolKind, TraceStep } from "./types";
-
-const kindIcon: Record<ToolKind, React.ComponentType<{ className?: string }>> = {
-  read: Search,
-  docs: FileText,
-  write: PenLine,
-};
 
 const kindLabel: Record<ToolKind, string> = {
   read: "خواندن",
@@ -48,7 +42,6 @@ export function ToolTrace({ steps, variant }: ToolTraceProps) {
 
       <ol className="space-y-1.5">
         {steps.map((step, i) => {
-          const Icon = kindIcon[step.kind] ?? Search;
           const state = step.state;
           const live = i === liveIndex && !done;
           return (

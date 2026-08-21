@@ -14,6 +14,10 @@ function appUrl() {
 
 (async () => {
   if (window.top !== window) return; // only top frame
+  // Mutual exclusion with the in-page embed: docs forks that already load
+  // <agent>/embed.js expose window.Liri — the extension yields to the
+  // in-page Liri instead of stacking a second bubble.
+  if (window.Liri) return;
   const base = await appUrl();
 
   const bubble = document.createElement("button");

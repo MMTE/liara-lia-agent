@@ -172,6 +172,18 @@ export function ConsoleHome() {
     [loadApps]
   );
 
+  // Widget-panel sync: connect/disconnect inside the Liri widget (its own
+  // ConnectPanel) dispatches "liara-mode" — mirror it here so the apps
+  // list/phase follow without a reload.
+  useEffect(() => {
+    const onLiriMode = (e: Event) => {
+      const mode = (e as CustomEvent<"connected" | "demo" | "docs">).detail;
+      if (mode === "connected" || mode === "demo" || mode === "docs") onModeChange(mode);
+    };
+    window.addEventListener("liara-mode", onLiriMode);
+    return () => window.removeEventListener("liara-mode", onLiriMode);
+  }, [onModeChange]);
+
   // The open app — real selection in connected mode, the demo card otherwise.
   const active = useMemo<Selection | null>(
     () =>

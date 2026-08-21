@@ -12,11 +12,12 @@ interface Stats {
 }
 
 export default function UsageMeter() {
-  if (process.env.NEXT_PUBLIC_USAGE_METER !== "1") return null;
-
   const [stats, setStats] = useState<Stats | null>(null);
 
+  // Gated (ADR-0009): hooks must run unconditionally (rules-of-hooks), so the
+  // env check lives inside the effect — unset means no /api/stats polling.
   useEffect(() => {
+    if (process.env.NEXT_PUBLIC_USAGE_METER !== "1") return;
     let alive = true;
     const tick = () =>
       fetch("/api/stats")
@@ -31,7 +32,7 @@ export default function UsageMeter() {
     };
   }, []);
 
-  if (!stats) return null;
+  if (process.env.NEXT_PUBLIC_USAGE_METER !== "1" || !stats) return null;
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 text-[11px] text-[var(--text-dim)]" dir="rtl">
       <span>🏁 {stats.turns} نوبت</span>

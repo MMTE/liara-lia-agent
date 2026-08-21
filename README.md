@@ -69,9 +69,10 @@ docs-site (static, fork of liara-cloud/docs)     agent (this repo — Node app)
   skills for troubleshooting, deployment, docs-research.
 - **Embed contract**: `public/embed.js` (agent origin) renders the bubble +
   panel iframe and exposes `window.Liri = { open(prefill), close() }`. The
-  panel accepts `postMessage {type:"liri-prefill"}` from the configured docs
-  origin only. `?embed=1` switches the widget's scope label to
-  «دستیار مستندات لیارا».
+  panel accepts `postMessage {type:"liri-prefill"}` from the app's own origin
+  and the configured docs origin (in local dev without the env, additionally
+  the embedding referrer's origin — non-production only). `?embed=1` switches
+  the widget's scope label to «دستیار مستندات لیارا».
 - **Model**: `zai/glm-5.2` via Vercel AI Gateway, optionally pinned to
   Blackbox with `CHAT_PROVIDER=blackbox`. Liara AI, OpenRouter, and any
   OpenAI-compatible endpoint are switchable through env only.

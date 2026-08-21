@@ -37,19 +37,19 @@ export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent,
   // Liri embed (docs-site): the host page prefills the composer via
   // postMessage { type: "liri-prefill", text } — never auto-sends.
   // Origin allowlist: this app's own origin plus the docs fork when
-  // NEXT_PUBLIC_DOCS_SITE_ORIGIN is configured. When that env is unset
-  // (local dev), the embedding host's origin from document.referrer is
-  // accepted instead, so the docs-site on another port works without env
-  // config. Foreign origins are ignored.
+  // NEXT_PUBLIC_DOCS_SITE_ORIGIN is configured. When that env is unset, only
+  // non-production builds additionally accept the embedding host's origin
+  // from document.referrer, so the docs-site on another port works in local
+  // dev without env config. Foreign origins are ignored.
   useEffect(() => {
     const selfOrigin = window.location.origin;
-    // Docs fork origin when configured; otherwise (local dev, env unset) the
-    // embedding host from document.referrer. Malformed values → null → reject.
+    // Docs fork origin when configured; otherwise (env unset, non-production
+    // only) the embedding host from document.referrer. Malformed → reject.
     let trustedOrigin: string | null = null;
     try {
       trustedOrigin = process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN
         ? new URL(process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN).origin
-        : document.referrer
+        : process.env.NODE_ENV !== "production" && document.referrer
           ? new URL(document.referrer).origin
           : null;
     } catch {
@@ -85,6 +85,14 @@ export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent,
     if (draft.trim().length === 0 || agent.isBusy) return;
     agent.ask(draft);
     setDraft("");
+  };
+
+  // Console mode sync: connect/disconnect inside the widget panel also
+  // notifies the /console host (ConsoleHome listens for "liara-mode") so its
+  // apps list/phase don't go stale. Other surfaces have no listener.
+  const handleModeChange = (m: "connected" | "demo" | "docs") => {
+    setMode(m);
+    window.dispatchEvent(new CustomEvent("liara-mode", { detail: m }));
   };
 
   const renderMessage = (m: LiriMessage, i: number) => {
@@ -219,7 +227,7 @@ export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent,
           </span>
         )}
         <div className="ms-auto shrink-0">
-          <ConnectPanel onChanged={setMode} />
+          <ConnectPanel onChanged={handleModeChange} />
         </div>
       </div>
 
