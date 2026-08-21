@@ -63,3 +63,7 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
   (BM25+RRF now, cosine bolts on with embeddings), skills (troubleshooting,
   deployment, docs-research). Live-verified: agent runs Persian→English query
   reformulation then read_doc on laravel/quick-start and answers with citations.
+- 2026-08-21 — Task 10 done: edge rate limiting verified (30/min eve, 120/min
+  api — 429 at request 31), POST /api/connect validates token via Liara API and
+  stamps sid→user-principal (channel AuthFn), health/stats endpoints, live
+  usage meter fed from stream events, connect + about panels, hydration guard.
