@@ -2,13 +2,16 @@
 /**
  * Exploration loop for the Lia mascot: FLUX.2 Pro with reference images.
  *
- *   node scripts/explore-lia.mjs [refsDir] [outDir] [count]
+ *   node scripts/explore-lia.mjs [refsDir] [outDir] [count] [baseImage]
  *
  * Defaults: refsDir = ../../lia-picture-assets (main checkout), outDir = its
  * output/ subfolder, count = 3. Each run uploads the reference images via the
  * Replicate files API, generates `count` seeded variants at 0.5 MP (fast,
  * cheap exploration size), and writes them to outDir. Seeds are printed so a
  * promising variant can be reproduced later at higher resolution.
+ *
+ * With baseImage: that render is uploaded FIRST and the variation prompt is
+ * used — identity stays anchored to the chosen design while the seed explores.
  */
 import { spawn } from "node:child_process";
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
@@ -21,6 +24,7 @@ const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const REFS = path.resolve(process.argv[2] ?? path.join(ROOT, "..", "..", "lia-picture-assets"));
 const OUT = path.resolve(process.argv[3] ?? path.join(REFS, "output"));
 const COUNT = Number(process.argv[4] ?? 3);
+const BASE = process.argv[5] ? path.resolve(process.argv[5]) : undefined;
 
 // User-provided design brief (2026-08-22) — verbatim.
 const PROMPT = `Using the attached images as visual references, design an original AI assistant mascot named Lia, inspired by the overall visual identity and character traits of Liara T'Soni from Mass Effect.
@@ -46,6 +50,15 @@ Important: the attached images are style and character references only. Do not r
 
 Avoid: photorealism, anime exaggeration, chibi proportions, generic robot appearance, generic human assistant appearance, excessive cyberpunk elements, busy backgrounds, text, logos, UI elements, or watermarks.`;
 
+// Variation mode: first input image is the chosen design, identity is fixed.
+const VARIATION_PROMPT = `The first image is the chosen design of Lia, an original AI assistant mascot for a developer platform. Keep her character identity — face, proportions, blue/cyan palette, art style, and rendering — consistent with the first image. The remaining images are identity and style references only; do not copy them.
+
+Create a subtle variation of the chosen design: same centered head-and-shoulders avatar composition for a circular container, face clearly visible, neutral-friendly expression, with a slightly different nuance of expression, head angle, lighting, or background tone.
+
+Polished 2D/3D hybrid mascot illustration: clean shapes, soft lighting, subtle gradients, premium SaaS aesthetic, strong silhouette readable at 32–64px, minimal visual noise. An AI companion for developers, not a game character.
+
+Avoid: photorealism, anime exaggeration, chibi proportions, generic robot or generic human assistant appearance, excessive cyberpunk elements, busy backgrounds, text, logos, watermarks.`;
+
 async function token() {
   if (process.env.REPLICATE_API_TOKEN) return process.env.REPLICATE_API_TOKEN;
   try {
@@ -64,6 +77,14 @@ function sips(args) {
   });
 }
 
+/** Stage an image as jpeg (flux input_images rejects webp) via macOS sips. */
+async function toStagedJpeg(src, label) {
+  if (!/\.webp$/i.test(src)) return src;
+  const dst = path.join(os.tmpdir(), `lia-ref-${label}.jpeg`);
+  await sips(["-s", "format", "jpeg", src, "--out", dst]);
+  return dst;
+}
+
 const auth = await token();
 if (!auth) {
   console.error("✖ REPLICATE_API_TOKEN not set (env or .env).");
@@ -80,32 +101,28 @@ if (names.length === 0) {
 }
 const staged = [];
 for (const name of names) {
-  const src = path.join(REFS, name);
-  if (/\.webp$/i.test(name)) {
-    const dst = path.join(os.tmpdir(), `lia-ref-${name.replace(/\.webp$/i, "")}.jpeg`);
-    await sips(["-s", "format", "jpeg", src, "--out", dst]);
-    staged.push(dst);
-  } else {
-    staged.push(src);
-  }
+  staged.push(await toStagedJpeg(path.join(REFS, name), name.replace(/\.[^.]+$/, "")));
 }
 console.log(`refs: ${staged.length} image(s) from ${REFS}`);
 
-// Upload refs once via the files API (hosted URLs, no data-URL size limits).
+// Upload the anchor (if any) first, then the refs, via the files API.
+const ordered = BASE ? [await toStagedJpeg(BASE, "anchor"), ...staged] : staged;
 const refUrls = [];
-for (const file of staged) {
+for (const file of ordered) {
   const buf = await readFile(file);
   const uploaded = await replicate.files.create(buf, { filename: path.basename(file) });
   refUrls.push(uploaded.urls.get);
 }
+const prompt = BASE ? VARIATION_PROMPT : PROMPT;
+const PREFIX = BASE ? "lia-var" : "lia-explore";
 
 for (let i = 1; i <= COUNT; i++) {
   const seed = Math.floor(Math.random() * 2 ** 31);
-  const outPath = path.join(OUT, `lia-explore-${String(i).padStart(2, "0")}-${seed}.webp`);
+  const outPath = path.join(OUT, `${PREFIX}-${String(i).padStart(2, "0")}-${seed}.webp`);
   try {
     const output = await replicate.run("black-forest-labs/flux-2-pro", {
       input: {
-        prompt: PROMPT,
+        prompt,
         input_images: refUrls,
         resolution: "0.5 MP",
         aspect_ratio: "1:1",
