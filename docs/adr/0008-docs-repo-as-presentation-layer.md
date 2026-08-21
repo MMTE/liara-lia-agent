@@ -31,10 +31,11 @@ the docs site requests our agent server.
    cookie-policy changes are needed. A native island (cross-origin fetch + explicit CORS
    headers) is a later upgrade, not a launch requirement.
 4. Chrome extension remains as-is — a second consumer of the same embed pattern.
-5. The in-app custom reader (plan Tasks 1–3 output) is demoted to a fallback surface;
-   agent answer citations deep-link to the docs-site origin (`urlToRoute` maps corpus
-   URLs to its paths). Deletion of the fallback is decided after the docs-site
-   deployment is verified.
+5. **No duplicate docs UI** (product-owner ruling): the docs side is the fork
+   exclusively. The in-app custom reader (plan Tasks 1–3 output) receives no further
+   work, stays runnable during development, and is **deleted at ship** (plan Task 10)
+   once the docs-site deployment is verified. Citations deep-link only to the docs-site
+   origin.
 
 ## Consequences
 + Judges get the real docs.liara.ir experience with Liri woven in — not a replica.

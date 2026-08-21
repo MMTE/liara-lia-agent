@@ -703,7 +703,7 @@ git commit -m "feat: Liri widget components on real eve events"
 - Produces:
   - `embed.js`: self-configuring loader — reads `document.currentScript.dataset.origin` (default same-origin), injects fixed RTL bubble («✦ لیری») bottom-left + iframe panel `<origin>/chat?embed=1`, Escape/click-outside closes, inline styles only (must render inside the docs fork's Tailwind scope without depending on it).
   - `docs-site` patch: `_app.jsx` renders `<script src="${process.env.NEXT_PUBLIC_AGENT_ORIGIN || "https://liara-agent.iran.liara.ir"}/embed.js" data-origin={...} defer />`.
-  - Citations with `route` open `${process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN || ""}/${route}` (agent env; empty → in-app fallback reader at `/docs/<route>`).
+  - Citations with `route` ALWAYS open `${process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN}/${route}` — the fork is the only docs surface (ADR-0008 §5, product-owner ruling: no fallback branch to the in-app reader).
 
 - [ ] **Step 1: Move chat to `/chat` and mount the widget there**
 
@@ -715,7 +715,7 @@ Port the injection logic from `extension/content.js` (bubble/panel/iframe/close)
 
 - [ ] **Step 3: Citation deep links**
 
-AnswerCard citation clicks → `window.open(docsSiteOrigin + "/" + route, "_self")` when `NEXT_PUBLIC_DOCS_SITE_ORIGIN` is set, else router-push the fallback reader. Same rule for the Chat UI's existing `Citations` component.
+AnswerCard citation clicks and the Chat UI's existing `Citations` component → `window.open(docsSiteOrigin + "/" + route, "_blank")` with `docsSiteOrigin = process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN` (required env for this behavior; if unset, render citations as plain external links to `citation.url` — never route to the in-app reader).
 
 - [ ] **Step 4: End-to-end verification (P0 gate)**
 
@@ -793,11 +793,11 @@ git commit -m "feat: connected console surface with proactive incident nudge"
 - Modify: `scripts/smoke.mjs`, `README.md`, `CHANGELOG.md`
 - Reference: `docs/adr/0008-docs-repo-as-presentation-layer.md` (already written — do not create a new ADR)
 
-- [ ] **Step 1: Extend smoke** — add checks to `scripts/smoke.mjs` (follow its existing fetch/assert style): `GET /` contains «مستندات لیارا»; `GET /docs/<DEFAULT_ROUTE-ish path>` 200; `GET /api/docs/search?q=nodejs` → `results.length > 0`; `GET /chat` 200; (if Task 9 shipped) `GET /console` 200, `GET /api/liara/apps` → 401 `{connected:false}` unauthenticated. Run: `node scripts/smoke.mjs http://localhost:3000` → `SMOKE OK n/n`.
+- [ ] **Step 1: Extend smoke** — add checks to `scripts/smoke.mjs` (follow its existing fetch/assert style), written for the post-Step-2 state: `GET /` returns the landing (status 200); `GET /chat` 200; (if `/api/docs/search` kept in Step 2) `GET /api/docs/search?q=nodejs` → `results.length > 0`; (if Task 9 shipped) `GET /console` 200 and `GET /api/liara/apps` → 401 `{connected:false}` unauthenticated. Run: `node scripts/smoke.mjs http://localhost:3000` → `SMOKE OK n/n`.
 
-- [ ] **Step 2: ADR-0008** — short decision record: docs-first home (`/`), widget shares one eve session/storage with `/chat`, event mapper as UI contract, console BFF pattern reusing sid sessions. Cite prototype as design source.
+- [ ] **Step 2: Delete the duplicate docs UI (ADR-0008 §5)** — once the docs-site deployment is verified: remove `src/components/docs/` (DocsShell/Sidebar/ArticleView), `src/app/docs/[...slug]/`, the `/` reader (root becomes a small landing that links the docs site + `/chat` + `/console`), `src/app/api/docs/nav+page` routes, and `src/lib/docs-pages.js` + its test (dead after reader removal — `urlToRoute` lives independently in `liri-events.js`; `/api/docs/search` stays only if the widget consumes it, else it goes too). Keep `CodeBlock.tsx` (used by Message/AnswerCard). Run `node --test` + `npm run build` + smoke.
 
-- [ ] **Step 3: README/CHANGELOG** — README: judge guide rewritten for the two surfaces (start at `/`, ⌘K, ask from any page, connect account → `/console`), architecture diagram section updated (widget + docs routes + BFF), prototype folder mentioned as design reference. CHANGELOG entry summarizing the port.
+- [ ] **Step 3: README/CHANGELOG** — README: judge guide rewritten for the real topology (primary link = the docs-site deployment with Liri embedded; agent app = `/chat` + `/console` + APIs; extension install), architecture section updated per ADR-0008, `docs-site/PATCHES.md` + sync script documented, prototype folder mentioned as design reference. CHANGELOG entry summarizing the port + pivot.
 
 - [ ] **Step 4: Full verification gate**
 
