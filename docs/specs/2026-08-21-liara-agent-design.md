@@ -120,22 +120,30 @@ apps are `/v1/projects/*` in Liara's API):
 
 Auth: per-session Bearer token (connected/demo mode). 401 → agent prompts to connect.
 
-### 4.4 Approval gate (writes)
-Eve HITL if the web channel exposes it (verify during build); otherwise enforced two-step
-tool protocol: write tool called with `propose` returns an `actionId` + human-readable
-diff; `execute` requires the same `actionId` and only runs after the user's explicit "yes"
-message in the session (consent is checked from the transcript by the server-side gate,
-not trusted to the model). UI shows pending actions with Approve/Reject buttons when
-possible. Never silent mutations; destructive ops (delete app/db) are not exposed at all.
+### 4.4 Approval gate (writes) — native Eve HITL (verified)
+Write operations are gated by the connection-level `approval` policy
+(`agent/lib/liara-approval.ts`): reads auto-run, writes (`restartApp`,
+`updateEnvs`, `releasesDeploy`) return `"user-approval"` — Eve durably parks the
+turn at `session.waiting` until the user answers. The web client renders the
+`input.requested` event (approve/cancel buttons) and answers via
+`agent.respond()`; follow-up text like «بله» also resolves approvals. The
+custom two-step fallback from the original design is dropped — Eve's native
+mechanism covers it (ADR-0007). Never silent mutations; destructive ops
+(delete app/db) are not exposed at all.
 
 ### 4.5 Agent (agent/)
-- `agent.ts`: model `zai/glm-5.2` (AI Gateway) primary; provider order env-configurable
-  (`CHAT_PROVIDER=vercel|liara`), automatic fallback on failure.
-- `instructions.md`: identity (Liara cloud operator), language mirroring (fa/en),
-  citation requirement, refusal-when-unsure, approval policy, pinned-app context rule,
-  next-step suggestion rule.
-- `skills/`: `troubleshooting.md` (incident runbook: releases→logs→events→docs→diagnose→
-  propose), `deployment.md`, `docs-research.md`.
+- `agent.ts`: provider selected at module load via `CHAT_PROVIDER=vercel|liara|
+  openrouter|orca` (+ optional `CHAT_MODEL`): gateway ids for vercel (glm-5.2
+  promo default), OpenAI-compatible provider objects for the rest
+  (ADR-0001 addendum). `modelContextWindowTokens: 128_000` for provider-object
+  models (compaction requirement). Session token budgets via `limits.*` (native
+  approve/stop continuation prompts — cost rubric).
+- `instructions.md`: operator persona committed — identity, fa/en mirroring,
+  citation requirement, refusal-when-unsure, approval policy, pinned-app
+  context, next-step suggestions, token hygiene.
+- `skills/`: `troubleshooting.md` (incident runbook: releases→logs→events→
+  metrics→docs→diagnose→propose→approve→act→verify), `deployment.md`,
+  `docs-research.md` (planned; Task 8).
 
 ### 4.6 Web UI (src/, RTL Persian-first)
 - Streaming chat, markdown + code highlight + copy buttons.
@@ -161,12 +169,19 @@ deployed app URL (from extension options). Packaged zip in repo. No dashboard DO
 - Errors: provider fallback chain; tool errors retried once, surfaced in Persian.
 
 ### 4.9 Deployment (Liara)
-- Liara Node.js platform app (Next standalone output). `liara.json` config; deploy via
-  Liara CLI or git. Health: `/api/health`. Env: gateway key, Liara AI key, demo token,
-  provider order.
-- Deploy early (target: first deployment tonight), not last.
-- Risk: Iran DC outbound to Vercel Gateway — test at deploy; if blocked, flip primary to
-  ai.liara.ir via env (ADR-0001).
+- Liara Node.js platform app. Two supported shapes (decide at Task 11 after a
+  local production build test):
+  (a) Next standalone (`next build`/`next start`) with `withEve` mounting
+  `/eve/*` same-origin — single process, preferred;
+  (b) `eve build` → Nitro (`.output/`) + `eve start --host 0.0.0.0` if the
+  Next-integrated runtime proves incomplete in production.
+- Either way: proxy must preserve `/eve/` AND `/.well-known/workflow/` prefixes
+  unprefixed; persist `.eve/.workflow-data` (durable sessions) across
+  restarts; health check `GET /eve/v1/health`.
+- Env: provider keys (`CHAT_PROVIDER` + per-provider), demo token, `PUBLIC_APP_URL`.
+- Deploy early (target: tonight), not last.
+- Risk: Iran DC outbound to Vercel Gateway / OpenRouter — test at deploy;
+  flip `CHAT_PROVIDER` to `liara` (Iran-local) via env only (ADR-0001).
 
 ## 5. Data flows
 

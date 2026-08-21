@@ -27,3 +27,12 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
   deepseek-chat-v3.1 verified $0.25/M) + OrcaRouter (orcarouter/auto verified,
   deepseek-v4 credit). User authorized paid budget use on Gateway (~$5) and
   OpenRouter. Gateway glm-5.2 promo still 503; persistent probe running.
+- 2026-08-21 — **Eve runtime verified e2e**: full agent turn via OrcaRouter
+  (CHAT_PROVIDER=orca) through next dev + withEve + /eve/v1/session stream +
+  useEveAgent client. glm-5.2 promo 503 is upstream (probe watching);
+  OpenRouter verified via proxy; Liara AI pending key.
+- 2026-08-21 — Tasks 0–3 complete (scaffold c05a97f, eve spike ADR-0007,
+  retrieval logic fea2ae1, mdx cleaner 1e25420 — 18/18 tests). Plan carries a
+  live execution-status table now.
+- 2026-08-21 — Chat UI checkpoint (d9c4745): RTL Persian, Vazirmatn (local),
+  scenarios, activity timeline, citation chips, HITL approval cards, streaming.

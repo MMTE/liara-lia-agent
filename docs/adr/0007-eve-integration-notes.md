@@ -63,3 +63,28 @@ Accepted 2026-08-21 (eve 0.42.0, docs from node_modules/eve/docs)
   vendor time, `scripts/vendor-liara-specs.mjs`).
 - Connection approval policy lives in `agent/lib/liara-approval.ts`, shared by
   both connections.
+
+## Verification log (2026-08-21, ~08:40)
+
+**End-to-end agent turn VERIFIED** with `CHAT_PROVIDER=orca` (OrcaRouter,
+`orcarouter/auto`) through the full production path: `next dev` + `withEve` →
+`/eve/v1/health` `{ok:true}` → `POST /eve/v1/session` → durable session → SSE
+stream (`session.started`, `turn.started`, `message.received`, `step.started`
+with `modelId`, `reasoning.appended` deltas). The `useEveAgent` browser client
+connected and streamed the same session.
+
+Runtime API facts learned:
+- `POST /eve/v1/session` requires `message` as a **string** (or array of
+  text/file parts), not an object; returns `{ok, sessionId, status:"accepted"}`.
+- Events stream from `GET /eve/v1/session/:id/stream` (NDJSON, not SSE headers).
+- Custom provider models (OpenAI-compatible) **require**
+  `modelContextWindowTokens` on `defineAgent` — eve compaction cannot resolve
+  Gateway catalog metadata for them and fails at compile ("does not have known
+  AI Gateway context window metadata"). We set 128,000.
+- Health: `GET /eve/v1/health`. Self-host production: `eve build` → `.output/`
+  (Nitro) → `PORT=3000 eve start --host 0.0.0.0`; proxy must preserve BOTH
+  `/eve/` and `/.well-known/workflow/` prefixes; persist `.eve/.workflow-data`.
+- Evals live beside `agent/` (repo `evals/`), not inside it.
+- `.gitignore` must exclude `.eve/` (local workflow state/locks).
+
+Provider verification summary → ADR-0001 addendum table.

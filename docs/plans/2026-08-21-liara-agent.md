@@ -23,6 +23,31 @@
 
 ---
 
+## Execution status (2026-08-21 ~08:50)
+
+| Task | Status | Notes / commits |
+|---|---|---|
+| 0 Scaffold | ✅ done | `c05a97f` — Next 16.3.1 + eve 0.42.0 + withEve + gateway-loader.mjs (UA fix + optional proxy) |
+| 1 Eve spike | ✅ done | ADR-0007 written+verified; tasks 6–7 revised to OpenAPI connections + native HITL (`aaed462`) |
+| 2 Persian/BM25/RRF | ✅ done | `fea2ae1` — 12 tests; fixed plan's digit-normalization precedence bug |
+| 3 MDX cleaner/chunker | ✅ done | `1e25420` — 6 tests; JSX headings → markdown. Payload-attr bug (Tabs/Step self-closing attrs dropped → 458/1143 pages empty) found by CorpusBuilder; being fixed with regression tests |
+| 4 Corpus + embeddings | 🔄 running | CorpusBuilder: corpus half (embeddings deferred until Liara AI key) |
+| 5 Retrieval tools | ⏳ next | after 4 |
+| 6 OpenAPI connections | 🔄 running | LiaraConnections: vendored specs + approval policy + session store |
+| 7 HITL verification | ⏳ after 6 | needs DEMO_LIARA_TOKEN (user to provide) |
+| 8 Persona/scenarios | ◐ partial | instructions.md + scenarios.ts committed (`249d6bd`, `d9c4745`); skills/*.md pending |
+| 9 Web UI | ◐ partial | Chat/Message/Citations/ActivityTimeline/composer/empty-state committed (`d9c4745`); browser-verified render + send; polish pending |
+| 10 Panels/security | ⏳ pending | — |
+| 11 Deploy | ⏳ pending | target tonight; self-host facts in spec §4.9 |
+| 12 Extension/smoke | ⏳ pending | — |
+
+**Verified baseline:** full agent turn e2e via OrcaRouter (`CHAT_PROVIDER=orca`)
+through `next dev` + withEve + `/eve/v1/session` SSE + useEveAgent client.
+glm-5.2 promo pool 503 (upstream outage — probe watching); OpenRouter needs
+`HTTPS_PROXY`; Liara AI key pending. Deviations: Next 16 (not 15), node --test
+without directory arg, `type: module`, evals beside agent/, `.eve/` gitignored.
+
+
 ### Task 0: Scaffold Next.js + Eve + deps
 
 **Files:**
