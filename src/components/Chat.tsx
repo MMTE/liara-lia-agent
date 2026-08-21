@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEveAgent } from "eve/react";
 import { SCENARIOS } from "@/lib/scenarios";
+import { meterTurn, STORAGE_KEY } from "@/lib/turn-meter";
 import Message, { type ChatMessage } from "./Message";
 import ConnectPanel from "./ConnectPanel";
 import UsageMeter from "./UsageMeter";
@@ -24,8 +25,6 @@ interface SavedChat {
   events?: unknown[];
   session?: { sessionId: string; streamIndex: number };
 }
-
-const STORAGE_KEY = "liara-agent-chat";
 
 function isObj(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
@@ -94,43 +93,6 @@ function Typing() {
       <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[var(--text-dim)]" />
     </div>
   );
-}
-
-/** Post per-turn usage (parsed from stream events) to the stats endpoint. */
-function meterTurn(events: unknown[], status: string): void {
-  try {
-    let tokensIn = 0;
-    let tokensOut = 0;
-    let cacheRead = 0;
-    const tools: string[] = [];
-    for (const raw of events) {
-      if (!isObj(raw) || typeof raw.type !== "string" || !isObj(raw.data)) continue;
-      if (raw.type === "step.completed" && isObj(raw.data.usage)) {
-        const u = raw.data.usage as Record<string, unknown>;
-        tokensIn += typeof u.inputTokens === "number" ? u.inputTokens : 0;
-        tokensOut += typeof u.outputTokens === "number" ? u.outputTokens : 0;
-        cacheRead += typeof u.cacheReadTokens === "number" ? u.cacheReadTokens : 0;
-      }
-      if (raw.type === "actions.requested" && Array.isArray(raw.data.actions)) {
-        for (const a of raw.data.actions as unknown[]) {
-          if (isObj(a) && typeof a.toolName === "string") tools.push(a.toolName);
-        }
-      }
-    }
-    void fetch("/api/stats", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        tokensIn,
-        tokensOut,
-        cacheReadTokens: cacheRead,
-        tools,
-        error: status === "error",
-      }),
-    });
-  } catch {
-    /* metering best-effort */
-  }
 }
 
 export default function Chat() {
