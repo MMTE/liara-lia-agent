@@ -154,8 +154,27 @@ export default function Chat() {
 
   // Liri embed (docs-site): the host page prefills the composer via
   // postMessage { type: "liri-prefill", text } — never auto-sends.
+  // Origin allowlist: this app's own origin plus the docs fork when
+  // NEXT_PUBLIC_DOCS_SITE_ORIGIN is configured. When that env is unset
+  // (local dev), the embedding host's origin from document.referrer is
+  // accepted instead, so the docs-site on another port works without env
+  // config. Foreign origins are ignored.
   useEffect(() => {
+    const selfOrigin = window.location.origin;
+    // Docs fork origin when configured; otherwise (local dev, env unset) the
+    // embedding host from document.referrer. Malformed values → null → reject.
+    let trustedOrigin: string | null = null;
+    try {
+      trustedOrigin = process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN
+        ? new URL(process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN).origin
+        : document.referrer
+          ? new URL(document.referrer).origin
+          : null;
+    } catch {
+      trustedOrigin = null;
+    }
     const onMessage = (e: MessageEvent) => {
+      if (e.origin !== selfOrigin && e.origin !== trustedOrigin) return;
       const data = e.data as { type?: unknown; text?: unknown } | null;
       if (!data || data.type !== "liri-prefill" || typeof data.text !== "string") return;
       const text = data.text.trim();

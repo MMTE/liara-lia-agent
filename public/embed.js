@@ -76,8 +76,8 @@
       panel = null;
     }
     iframe = null;
-    iframe = null;
     iframeLoaded = false;
+    pendingPrefill = null;
     stopDelivery();
     document.removeEventListener("keydown", onKeydown);
   }
