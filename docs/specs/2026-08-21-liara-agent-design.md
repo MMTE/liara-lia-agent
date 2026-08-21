@@ -72,16 +72,27 @@ No vector DB, no Redis, no queue. The docs index (chunks + embeddings) is precom
 
 ## 4. Components
 
-### 4.1 Docs pipeline (`scripts/build-docs-index.mjs`)
+### 4.1 Docs pipeline (`scripts/build-docs-index.mjs`) — dual corpus
+
+**Corpus A — product guides (Persian)**, from the liara-cloud/docs repo:
 1. `git clone --depth 1` liara-cloud/docs (cached).
 2. Walk `src/pages/**/*.{md,mdx}` (1,143 files).
 3. Clean MDX: strip imports, `<Head>`, JSX tags (keep inner text), keep code fences
    verbatim; extract title from `<title>` or first `# H1`.
 4. Chunk by heading sections (H2/H3), ~1,200 chars max; metadata: `slug` (path →
-   docs.liara.ir URL), `title`, `product` (paas/dbaas/ai/…), `sectionPath`.
-5. Embed via Liara AI `intfloat/multilingual-e5-large` (`query:`/`passage:` prefixes),
-   batched, disk-cached (re-runs free).
-6. Emit `src/data/docs-index.json` (chunks + base64 float32 vectors).
+   docs.liara.ir URL), `title`, `product` (paas/dbaas/ai/…), `sectionPath`,
+   `source: "guides"`.
+
+**Corpus B — API reference (English, clean markdown)**, from developers.liara.ir:
+1. Fetch `https://developers.liara.ir/llms.txt` (~170 page URLs across PaaS, DBaaS,
+   object storage, DNS, mail, file-browser, IaaS, AI services).
+2. Fetch each `*.md` page (concurrency-limited, disk-cached).
+3. Chunk by endpoint/section; metadata: `url` (developers.liara.ir page), `title`,
+   `source: "api-ref"`.
+
+Both corpora then: embed via Liara AI `intfloat/multilingual-e5-large`
+(`query:`/`passage:` prefixes), batched, disk-cached (re-runs free); emit
+`src/data/docs-index.json` (chunks + base64 float32 vectors).
 
 ### 4.2 Retrieval (`src/lib/docs-index.ts`)
 - BM25 (mini index, Persian normalization: strip ZWNJ, map ي→ی ك→ک, Arabic→Persian digits)
