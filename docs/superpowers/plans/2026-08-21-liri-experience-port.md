@@ -329,45 +329,39 @@ git commit -m "feat: docs workspace surface at / and /docs/[...slug]"
 
 ---
 
-### Task 4: ⌘K search dialog
+### Task 4: Docs-site fork — vendor + bring up (ADR-0008)
 
 **Files:**
-- Create: `src/components/docs/SearchDialog.tsx`
-- Modify: `src/components/docs/DocsShell.tsx` (mount dialog, wire ⌘K/Ctrl+K and header button)
+- Create: `docs-site/` (vendored copy of `github.com/liara-cloud/docs` @ upstream HEAD, no `.git`), `docs-site/PATCHES.md`, `scripts/sync-docs-site.mjs`
+- Modify: `.gitignore` (`docs-site/node_modules/`, `docs-site/out/`, `docs-site/.next/`), `tsconfig.json` (exclude `"prototype"` — pre-existing tsc breakage, folded here from Task 3)
 
 **Interfaces:**
-- Consumes: `GET /api/docs/search` (Task 2).
-- Produces: `<SearchDialog open onClose onNavigate={(route)=>router.push('/docs/'+route)} onAsk={(q)=>...} />` — `onAsk` prop stored on DocsShell state, consumed by Task 7's widget request mechanism.
+- Consumes: upstream repo (already cloned at `/tmp/liara-docs`; re-clone if missing: `git clone --depth 1 https://github.com/liara-cloud/docs`).
+- Produces (for Tasks 8, 10):
+  - `docs-site/` buildable: `cd docs-site && yarn install && yarn build` → static export in `docs-site/out/` (their `next.config.mjs` sets `output: "export"`, `trailingSlash: true`).
+  - `scripts/sync-docs-site.mjs`: re-syncs upstream (`git clone --depth 1` to temp, rsync over `docs-site/` excluding `node_modules/.next/out`), then fails loudly listing PATCHES.md entries that no longer apply.
+  - `PATCHES.md`: numbered list of every intentional diff vs upstream (starts with just the vendoring note; Task 8 appends the `_app.jsx` embed patch).
 
-- [ ] **Step 1: Implement SearchDialog**
+- [ ] **Step 1: Vendor the fork**
 
-Port the interaction from the prototype's header intent: fixed overlay (`z-50`, `bg-black/40`), centered panel `w-[min(92vw,34rem)]` light card. Debounced (250ms) fetch of `/api/docs/search?q=`, min 2 chars. Rows: icon + `title` + route path (`dir="ltr"`, truncated). Footer: «یا از لیری بپرسید» button → `onAsk(q)`. Enter opens first result; Esc closes; arrow keys move selection. Empty state: «چیزی پیدا نشد — از لیری بپرسید».
+Copy `/tmp/liara-docs` → `docs-site/` excluding `.git`. Write `PATCHES.md` header: upstream URL, synced commit SHA (`git -C /tmp/liara-docs rev-parse HEAD`), patch list (initially «none»). Add the three `.gitignore` entries and the `tsconfig.json` prototype exclude. Verify `npm run build` (agent app) is now clean — this closes Task 3's deferred concern.
 
-- [ ] **Step 2: Wire in DocsShell**
+- [ ] **Step 2: Bring it up**
 
-```tsx
-const [searchOpen, setSearchOpen] = useState(false);
-useEffect(() => {
-  const onKey = (e: KeyboardEvent) => {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setSearchOpen((v) => !v); }
-  };
-  window.addEventListener("keydown", onKey);
-  return () => window.removeEventListener("keydown", onKey);
-}, []);
-```
+`cd docs-site && yarn install && yarn build` (their build runs `sitemap` + `fetch:models` scripts; if `fetch:models` needs network/keys and fails, record the failure and make it non-fatal the way their repo intends — check `src/scripts/fetch-liara-ai-models.js` — rather than skipping `yarn build`). Verify `docs-site/out/index.html` exists plus a Persian page (e.g. `out/paas/nodejs/index.html` or nearest real path from the sitemap output). Serve: `npx --yes serve docs-site/out -l 3002` (background) → `curl -s localhost:3002/ | head -c 200` returns their HTML.
 
-Header search button becomes `onClick={() => setSearchOpen(true)}`. `onAsk` → store in `pendingAsk` state (Task 7 replaces the placeholder consumer).
+- [ ] **Step 3: Record integration facts in PATCHES.md**
 
-- [ ] **Step 3: Browser verification**
-
-⌘K opens, typing «دیپلوی» lists results within ~300ms, Enter navigates, Esc closes. Verify in browser; screenshot.
+Investigate and record (facts Task 8 depends on): (a) does Header search (Meilisearch client in `src/components/Header/index.jsx`) work without credentials against their public instance, or does it fail silently? (b) are fonts/images self-contained in `out/` or fetched from liara.ir CDNs? (c) export page count (`find docs-site/out -name index.html | wc -l`). No code changes in this step.
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src/components/docs/SearchDialog.tsx src/components/docs/DocsShell.tsx
-git commit -m "feat: cmd-K search palette over docs corpus"
+git add docs-site scripts/sync-docs-site.mjs .gitignore tsconfig.json
+git commit -m "feat: vendor liara-cloud/docs fork as presentation layer (ADR-0008)"
 ```
+
+**Scope note (deliberate cut):** the previously planned ⌘K SearchDialog for the in-app reader is dropped — the docs fork ships Liara's own search, and the in-app reader is demoted to fallback (ADR-0008 §5). Recorded, not silently dropped.
 
 ---
 
@@ -698,51 +692,42 @@ git commit -m "feat: Liri widget components on real eve events"
 
 ---
 
-### Task 8: Wiring — widget into docs, `/chat`, extension, deep links
+### Task 8: Embed wiring — Liri inside the docs fork (ADR-0008)
 
 **Files:**
-- Modify: `src/components/docs/DocsShell.tsx` (mount widget, consume `pendingAsk`), `src/app/page.tsx`, `src/app/docs/[...slug]/page.tsx` (pass nothing — widget is client), `extension/content.js` (iframe URL), `src/middleware.ts` only if it guards `/chat` (verify, likely no change)
-- Create: `src/app/chat/page.tsx` (moved current home)
+- Create: `public/embed.js` (agent origin; vanilla JS, no build step), `src/app/chat/page.tsx` (moved current home)
+- Modify: `docs-site/src/pages/_app.jsx` (create — upstream has none; loads embed.js), `docs-site/PATCHES.md` (append patch entry), `src/components/liri/LiriPanel.tsx` or `AnswerCard.tsx` citation handler (Task 7 output) for docs-site deep links
 
 **Interfaces:**
-- Consumes: `LiriWidget` (Task 7), `SCENARIOS`.
-- Produces: final P0 routes — `/` docs+widget, `/chat?embed=1` full-page chat (extension target), citations deep-link to `/docs/<route>`.
+- Consumes: `LiriWidget` (Task 7) mounted at `/chat` (full-page, `?embed=1` compact), `docs-site/` build (Task 4), extension (unchanged).
+- Produces:
+  - `embed.js`: self-configuring loader — reads `document.currentScript.dataset.origin` (default same-origin), injects fixed RTL bubble («✦ لیری») bottom-left + iframe panel `<origin>/chat?embed=1`, Escape/click-outside closes, inline styles only (must render inside the docs fork's Tailwind scope without depending on it).
+  - `docs-site` patch: `_app.jsx` renders `<script src="${process.env.NEXT_PUBLIC_AGENT_ORIGIN || "https://liara-agent.iran.liara.ir"}/embed.js" data-origin={...} defer />`.
+  - Citations with `route` open `${process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN || ""}/${route}` (agent env; empty → in-app fallback reader at `/docs/<route>`).
 
-- [ ] **Step 1: Move chat to `/chat`**
+- [ ] **Step 1: Move chat to `/chat` and mount the widget there**
 
-`src/app/chat/page.tsx` = old `src/app/page.tsx` content (import Chat). New `/` (from Task 3) stays docs. Verify `/chat` renders the existing chat unchanged and `?embed=1` still hides its header (`Chat.tsx:150-153`).
+`src/app/chat/page.tsx` = old `src/app/page.tsx` content; the page renders `<LiriWidget surface="docs" scopeLabel="مستندات لیارا" … />` full-page (embed=1 keeps compact chrome). Old `/` keeps the fallback reader (ADR-0008 §5 — deletion decided in Task 10).
 
-- [ ] **Step 2: Mount widget in DocsShell**
+- [ ] **Step 2: Write `public/embed.js` + docs-site patch**
 
-```tsx
-// inside DocsShell (client)
-const [askReq, setAskReq] = useState({ text: "", nonce: 0 });
-const ask = (text: string) => setAskReq((r) => ({ text, nonce: r.nonce + 1 }));
-// render at shell root:
-<LiriWidget
-  surface="docs"
-  scopeLabel="مستندات لیارا"
-  resource={page.title}
-  request={askReq}
-  onNavigate={(route) => router.push(`/docs/${route}`)}
-/>
-```
-Wire: ArticleView «پرسیدن از لیری درباره این صفحه» → `ask(...)`, SearchDialog `onAsk` → `ask(q)`, header «پرسیدن از لیری» button → `ask(SCENARIOS[0].promptFa)`… no — opens the panel with empty prompt: pass `request={{text:"", nonce:n+1}}` opens panel to HomeState (widget treats empty text as open-only).
+Port the injection logic from `extension/content.js` (bubble/panel/iframe/close) into `public/embed.js` with: RTL-aware positioning (`left: 20px; bottom: 20px`), a Liri-branded bubble (mascot `public/liri.jpg` from agent origin, 52px round, shadow), panel `width: min(420px, calc(100vw - 24px)); height: min(660px, 78vh)`, `iframe.src = origin + "/chat?embed=1"`. Create `docs-site/src/pages/_app.jsx` (`export default function App({ Component, pageProps })` + the script tag + `<Component {...pageProps} />`); append the patch entry to `PATCHES.md`.
 
-- [ ] **Step 3: Extension + docs updates**
+- [ ] **Step 3: Citation deep links**
 
-`extension/content.js:39`: `` iframe.src = `${base}/chat?embed=1`; ``
+AnswerCard citation clicks → `window.open(docsSiteOrigin + "/" + route, "_self")` when `NEXT_PUBLIC_DOCS_SITE_ORIGIN` is set, else router-push the fallback reader. Same rule for the Chat UI's existing `Citations` component.
 
-- [ ] **Step 4: End-to-end browser verification (P0 gate)**
+- [ ] **Step 4: End-to-end verification (P0 gate)**
 
-With `npm run dev` + eve standalone running (dev.sh): on `/`, click mascot → panel opens → send «چطور یک برنامه Node.js را دیپلوی کنم؟» → ToolTrace steps stream live (search_docs → read_doc with Persian labels + result lines) → AnswerCard streams with citations → click a citation → navigates to that docs page → ⌘K → «دیپلوی لاراول» → Enter → page opens. On a write path (connected/demo mode, scenario «درستش کن»): PlanCard appears with «تأیید» → post-approval tools render as verify trace. Screenshot each state.
+Agent dev on :3000 (already running); rebuild docs-site with `NEXT_PUBLIC_AGENT_ORIGIN=http://localhost:3000 yarn build` and serve `out/` on :3002. In a browser on `localhost:3002`: Liri bubble visible on every docs page → click → iframe panel loads `/chat?embed=1` → ask «چطور یک برنامه Node.js را دیپلوی کنم؟» → tool trace streams → cited answer → citation click lands on the docs-site page for that path. Also verify the extension still opens against `/chat?embed=1`. Screenshots of each state.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/app src/components/docs extension/content.js
-git commit -m "feat: Liri widget live on docs workspace; chat moves to /chat"
+git add public/embed.js src/app/chat src/components/liri docs-site/src/pages/_app.jsx docs-site/PATCHES.md
+git commit -m "feat: Liri embedded in the docs fork via agent-origin loader (ADR-0008)"
 ```
+
 
 ---
 
@@ -806,7 +791,7 @@ git commit -m "feat: connected console surface with proactive incident nudge"
 
 **Files:**
 - Modify: `scripts/smoke.mjs`, `README.md`, `CHANGELOG.md`
-- Create: `docs/adr/0008-docs-first-ui.md`
+- Reference: `docs/adr/0008-docs-repo-as-presentation-layer.md` (already written — do not create a new ADR)
 
 - [ ] **Step 1: Extend smoke** — add checks to `scripts/smoke.mjs` (follow its existing fetch/assert style): `GET /` contains «مستندات لیارا»; `GET /docs/<DEFAULT_ROUTE-ish path>` 200; `GET /api/docs/search?q=nodejs` → `results.length > 0`; `GET /chat` 200; (if Task 9 shipped) `GET /console` 200, `GET /api/liara/apps` → 401 `{connected:false}` unauthenticated. Run: `node scripts/smoke.mjs http://localhost:3000` → `SMOKE OK n/n`.
 
@@ -825,15 +810,15 @@ node scripts/smoke.mjs http://localhost:3000
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/smoke.mjs README.md CHANGELOG.md docs/adr/0008-docs-first-ui.md
-git commit -m "docs: ship docs-first experience; smoke coverage for new surfaces"
+git add scripts/smoke.mjs README.md CHANGELOG.md
+git commit -m "docs: ship docs-fork presentation layer; smoke coverage for new surfaces"
 ```
 
 ---
 
 ## Self-Review
 
-- **Spec coverage vs rubric:** UI/UX (55) → Tasks 3, 4, 7, 8 (two surfaces, ⌘K, traces, cards, RTL). Agentic (50) → Tasks 5, 7 (clarify/plan/verify rendering of real HITL), 9 (proactive nudge). Correctness (80) → unchanged retrieval + in-app citation deep-links (Task 8). Security (50) → no new trust boundaries except Task 9 BFF which reuses httpOnly sid + read-only endpoints. Deployment (40) / Cost (25) → unaffected; Task 10 verifies.
+- **Spec coverage vs rubric:** UI/UX (55) → Tasks 4, 7, 8 (real docs fork + embedded Liri, traces, cards, RTL). Agentic (50) → Tasks 5, 7 (clarify/plan/verify rendering of real HITL), 9 (proactive nudge). Correctness (80) → unchanged retrieval + citation deep-links into the docs fork (Task 8). Security (50) → embed.js is same-script-origin content + iframe (no new trust boundary); Task 9 BFF reuses httpOnly sid + read-only endpoints. Deployment (40) / Cost (25) → two Liara apps (docs fork static export + agent Node app); Task 10 verifies agent app + records docs-site deploy steps.
 - **Deliberate cuts:** mascot mood micro-animations beyond rings, activity timestamps, model-generated suggestion chips (SCENARIOS chips reused instead), api-ref reader styling beyond banner. Recorded, not silently dropped.
 - **Type consistency:** `TraceStep.state` (`active|done`) consumed by ToolTrace; `LiriMessage` union matches Task 5 test fixtures; `NavGroup/Page` shapes identical in Tasks 1–3; `request` nonce pattern matches prototype `LiriRequest`.
 - **Risk:** eve approval state names after respond are the one unverified assumption (noted in Task 5) — verify against a live stream before styling resolved states.
