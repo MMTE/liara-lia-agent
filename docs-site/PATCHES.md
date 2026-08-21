@@ -14,8 +14,19 @@ the presentation layer for Liri (ADR-0008). The agent app remains the backend se
 Intentional diffs vs upstream. Every entry MUST list its target file(s) in backticks and
 record the sha256 of that file in pristine upstream at patch time as
 `` `upstream-sha256:<hex>` `` — the sync script uses it to detect upstream drift.
-
-_None yet._
+1. `src/pages/_app.js` (`upstream-sha256:00411181b32bbd9840f0cc0032911ad6cdf340fb2ddcd76bfae2a910245d0bc4`)
+   — Liri embed (ADR-0008, Task 8a): renders `<AskLiri />` and, when
+   `NEXT_PUBLIC_AGENT_ORIGIN` is set at build time, loads
+   `${agentOrigin}/embed.js` (with matching `data-origin`, `defer`) on every
+   page. MDXProvider wrapping is preserved. (Modified upstream file — upstream
+   ships `_app.js`, so the embed hooks live there rather than a new `_app.jsx`.)
+2. `src/components/AskLiri.jsx` (`upstream-sha256:none`)
+   — new file: fixed RTL pill «✦ پرسیدن از لیری درباره این صفحه»
+   (bottom-right, `#6d5df0` → hover `#5a4bd8`, collapses to «✦ لیری» under
+   640px) that calls
+   `window.Liri.open("درباره «<page title>» توضیح بده — نکات مهم و خطاهای رایج را بگو")`
+   with the title cleaned of the «مستندات … - لیارا» chrome. No-op when
+   `NEXT_PUBLIC_AGENT_ORIGIN` is unset.
 
 ## Integration facts (Task 4 investigation, 2026-08-21)
 

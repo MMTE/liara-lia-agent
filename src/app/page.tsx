@@ -1,7 +1,5 @@
-import DocsShell from "@/components/docs/DocsShell";
-import { DEFAULT_ROUTE, getNav, resolvePage } from "@/lib/docs-pages.js";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  const page = resolvePage(DEFAULT_ROUTE)!;
-  return <DocsShell nav={getNav()} page={page} />;
+  redirect("/chat");
 }

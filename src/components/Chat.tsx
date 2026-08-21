@@ -152,6 +152,22 @@ export default function Chat() {
     () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("embed") === "1"
   );
 
+  // Liri embed (docs-site): the host page prefills the composer via
+  // postMessage { type: "liri-prefill", text } — never auto-sends.
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      const data = e.data as { type?: unknown; text?: unknown } | null;
+      if (!data || data.type !== "liri-prefill" || typeof data.text !== "string") return;
+      const text = data.text.trim();
+      if (text) {
+        setDraft(text);
+        (e.source as Window | null)?.postMessage({ type: "liri-prefill-ack" }, e.origin);
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
+
   const agent = useEveAgent({
     initialEvents: (saved.events ?? []) as never[],
     initialSession: saved.session as never,

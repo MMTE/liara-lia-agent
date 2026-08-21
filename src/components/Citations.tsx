@@ -4,6 +4,16 @@ export interface Citation {
   source?: string;
 }
 
+const DOCS_SITE_ORIGIN = (process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN || "").replace(/\/+$/, "");
+const DOCS_URL_RE = /^https:\/\/docs\.liara\.ir\//;
+
+/** Keep docs.liara.ir citations inside the vendored docs fork when its origin is configured. */
+function citationHref(url: string): string {
+  return DOCS_SITE_ORIGIN && DOCS_URL_RE.test(url)
+    ? `${DOCS_SITE_ORIGIN}/${url.replace(DOCS_URL_RE, "")}`
+    : url;
+}
+
 export default function Citations({ items }: { items: Citation[] }) {
   return (
     <div className="mt-3 pt-2.5 border-t border-[var(--border)]">
@@ -12,7 +22,7 @@ export default function Citations({ items }: { items: Citation[] }) {
         {items.map((c) => (
           <a
             key={c.url}
-            href={c.url}
+            href={citationHref(c.url)}
             target="_blank"
             rel="noopener noreferrer"
             title={c.title}
