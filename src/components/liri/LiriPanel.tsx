@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUp, RotateCcw, Square, X } from "lucide-react";
 import UsageMeter from "../UsageMeter";
+import AboutModal from "../AboutModal";
+import ConnectPanel from "../ConnectPanel";
 import { ActivityView } from "./ActivityView";
 import { AnswerCard } from "./AnswerCard";
 import { ClarifyCard } from "./ClarifyCard";
@@ -20,14 +22,52 @@ interface LiriPanelProps {
   detail?: string;
   state?: LiriResourceState;
   agent: LiriAgentHandle;
-  onClose: () => void;
+  /** standalone /chat mount: panel fills the viewport, no floating chrome, no close button */
+  fullPage?: boolean;
+  onClose?: () => void;
 }
 
-export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent, onClose }: LiriPanelProps) {
+export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent, fullPage, onClose }: LiriPanelProps) {
   const [view, setView] = useState<"chat" | "activity">("chat");
   const [draft, setDraft] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
+  const [mode, setMode] = useState<"connected" | "demo" | "docs" | null>(null);
+
+  // Liri embed (docs-site): the host page prefills the composer via
+  // postMessage { type: "liri-prefill", text } — never auto-sends.
+  // Origin allowlist: this app's own origin plus the docs fork when
+  // NEXT_PUBLIC_DOCS_SITE_ORIGIN is configured. When that env is unset
+  // (local dev), the embedding host's origin from document.referrer is
+  // accepted instead, so the docs-site on another port works without env
+  // config. Foreign origins are ignored.
+  useEffect(() => {
+    const selfOrigin = window.location.origin;
+    // Docs fork origin when configured; otherwise (local dev, env unset) the
+    // embedding host from document.referrer. Malformed values → null → reject.
+    let trustedOrigin: string | null = null;
+    try {
+      trustedOrigin = process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN
+        ? new URL(process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN).origin
+        : document.referrer
+          ? new URL(document.referrer).origin
+          : null;
+    } catch {
+      trustedOrigin = null;
+    }
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin !== selfOrigin && e.origin !== trustedOrigin) return;
+      const data = e.data as { type?: unknown; text?: unknown } | null;
+      if (!data || data.type !== "liri-prefill" || typeof data.text !== "string") return;
+      const text = data.text.trim();
+      if (text) {
+        setDraft(text);
+        (e.source as Window | null)?.postMessage({ type: "liri-prefill-ack" }, e.origin);
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -94,17 +134,27 @@ export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent,
 
   return (
     <div
-      role="dialog"
+      role={fullPage ? undefined : "dialog"}
       aria-label="لیری، دستیار عملیاتی لیارا"
       dir="rtl"
-      className="pointer-events-auto flex max-h-[min(78vh,660px)] w-[min(100vw-1.5rem,27.5rem)] flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text)] shadow-2xl shadow-black/40"
+      className={
+        fullPage
+          ? "pointer-events-auto flex h-full w-full max-w-4xl flex-col overflow-hidden bg-[var(--bg-raised)] text-[var(--text)]"
+          : "pointer-events-auto flex max-h-[min(78vh,660px)] w-[min(100vw-1.5rem,27.5rem)] flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text)] shadow-2xl shadow-black/40"
+      }
     >
       <header className="flex items-center gap-2.5 border-b border-[var(--border)] px-3 py-2.5">
         <Mascot mood={agent.mood} size={32} />
         <div className="min-w-0">
           <p className="text-[13px] font-semibold leading-tight text-[var(--text)]">لیری</p>
           <p className="text-[11px] leading-tight text-[var(--text-dim)]">
-            {surface === "docs" ? "دستیار مستندات لیارا" : "اپراتور عملیاتی لیارا"}
+            {mode === "connected"
+              ? "متصل به حساب شما"
+              : mode === "demo"
+                ? "حالت دمو"
+                : surface === "docs"
+                  ? "دستیار مستندات لیارا"
+                  : "اپراتور عملیاتی لیارا"}
           </p>
         </div>
 
@@ -126,6 +176,7 @@ export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent,
               </button>
             ))}
           </div>
+          <AboutModal />
           <button
             type="button"
             onClick={agent.reset}
@@ -134,14 +185,16 @@ export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent,
           >
             <RotateCcw className="h-4 w-4" />
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="بستن"
-            className="rounded-lg p-1.5 text-[var(--text-dim)] transition hover:bg-[var(--bg)] hover:text-[var(--text)]"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="بستن"
+              className="rounded-lg p-1.5 text-[var(--text-dim)] transition hover:bg-[var(--bg)] hover:text-[var(--text)]"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </header>
 
@@ -154,17 +207,20 @@ export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent,
         )}
         {detail && <span className="truncate text-[var(--text-dim)]">{detail}</span>}
         {state === "failed" && (
-          <span className="ms-auto flex shrink-0 items-center gap-1.5 rounded-md bg-[var(--err)]/15 px-1.5 py-0.5 text-[var(--err)]">
+          <span className="flex shrink-0 items-center gap-1.5 rounded-md bg-[var(--err)]/15 px-1.5 py-0.5 text-[var(--err)]">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--err)]" aria-hidden />
             ناموفق
           </span>
         )}
         {state === "ok" && (
-          <span className="ms-auto flex shrink-0 items-center gap-1.5 rounded-md bg-[var(--ok)]/15 px-1.5 py-0.5 text-[var(--ok)]">
+          <span className="flex shrink-0 items-center gap-1.5 rounded-md bg-[var(--ok)]/15 px-1.5 py-0.5 text-[var(--ok)]">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--ok)]" aria-hidden />
             سالم
           </span>
         )}
+        <div className="ms-auto shrink-0">
+          <ConnectPanel onChanged={setMode} />
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">

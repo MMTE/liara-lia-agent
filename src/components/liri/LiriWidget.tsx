@@ -27,13 +27,15 @@ interface LiriWidgetProps {
   state?: LiriResourceState;
   request?: LiriRequest;
   nudge?: LiriNudge;
+  /** standalone /chat mount: render the panel inline filling the viewport, no floating bubble */
+  fullPage?: boolean;
 }
 
 /**
  * Floating Liri launcher: collapsed bubble (bottom-left, physical `left` for
  * RTL), proactive nudge after 4s, and a nonce-triggered ask from the host page.
  */
-export function LiriWidget({ surface, scopeLabel, resource, detail, state, request, nudge }: LiriWidgetProps) {
+export function LiriWidget({ surface, scopeLabel, resource, detail, state, request, nudge, fullPage }: LiriWidgetProps) {
   const agent = useLiriAgent();
   const [open, setOpen] = useState(false);
   const [showNudge, setShowNudge] = useState(false);
@@ -55,6 +57,24 @@ export function LiriWidget({ surface, scopeLabel, resource, detail, state, reque
     const t = setTimeout(() => setShowNudge(true), 4000);
     return () => clearTimeout(t);
   }, [nudge]);
+
+  // Standalone /chat mount: panel inline at full viewport height — the
+  // bubble/nudge machinery only makes sense floating over a host page.
+  if (fullPage) {
+    return (
+      <div className="flex h-[100dvh] w-full justify-center">
+        <LiriPanel
+          fullPage
+          surface={surface}
+          scopeLabel={scopeLabel}
+          resource={resource}
+          detail={detail}
+          state={state}
+          agent={agent}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="pointer-events-none fixed bottom-5 left-5 z-50 flex flex-col items-start gap-3">

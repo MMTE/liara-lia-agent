@@ -8,7 +8,7 @@ const riskStyles: Record<PlanRisk, { label: string; className: string }> = {
   caution: { label: "نیازمند تأیید", className: "bg-[var(--warn)]/10 text-[var(--warn)]" },
 };
 
-/** same approve detection as the main chat (Chat.tsx HitlCard) */
+/** HITL approve-word detection (English + Persian) for the plan card buttons */
 const APPROVE_RE = /approve|تأیید|بله|yes/i;
 
 interface PlanCardProps {
