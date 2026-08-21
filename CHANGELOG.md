@@ -16,3 +16,6 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
   replace the custom two-step gate, per-session tokens via channel auth +
   connection getToken. glm-5.2 promo outage observed (provider-side);
   mitigation CHAT_PROVIDER=liara.
+- 2026-08-21 — Retrieval primitives (Task 2): Persian normalization +
+  tokenizer, Okapi BM25 index, RRF fusion in `src/lib/` with node:test
+  coverage (`tests/retrieval.test.mjs`).
