@@ -31,6 +31,11 @@ postures. The widget already models assistant moods (`idle/thinking/warning/succ
 
 3. Mascot renders the posture image (circular badge); mood ring retained as accent.
    `embed.js` bubble uses the idle badge from the agent origin.
+4. **Palette** (product-owner directive, 2026-08-22): the agent UI adopts Liara's real
+   design colors — accent `#00D4FF` (their dashboard cyan-teal), surfaces `#121212` /
+   `#1E1E1E`, borders `#282828`–`#2E2E2E`, text `#EEEEEE`/`#B1B6BE` — replacing the
+   prototype-era violet/navy tokens. Applies to the agent app's CSS vars, embed.js, and
+   the docs-site ask-button; Liara's own stylesheets stay untouched.
 
 ## Consequences
 + Distinct personality; mood legible at a glance; Mass Effect homage lands with judges.
