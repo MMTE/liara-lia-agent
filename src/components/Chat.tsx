@@ -146,7 +146,10 @@ export default function Chat() {
 
   // Hydration guard: localStorage-restored events differ from SSR output.
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // ?embed=1 (Chrome extension iframe): compact chrome-less mode
+  const [embed] = useState(
+    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("embed") === "1"
+  );
 
   const agent = useEveAgent({
     initialEvents: (saved.events ?? []) as never[],
@@ -197,18 +200,20 @@ export default function Chat() {
 
   return (
     <div className="mx-auto flex h-[100dvh] max-w-4xl flex-col">
-      <header className="flex items-center justify-between gap-2 border-b border-[var(--border)] px-4 py-2.5 md:px-6">
-        <div className="flex items-center gap-2">
-          <span className="text-[15px] font-bold">✦ ایجنت لیارا</span>
-          <span className="hidden text-[11px] text-[var(--text-dim)] sm:inline">
-            {mode === "connected" ? "اپراتور حساب شما" : mode === "demo" ? "اپراتور (دمو)" : "دستیار مستندات"}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <ConnectPanel onChanged={(m) => setMode(m)} />
-          <AboutModal />
-        </div>
-      </header>
+      {!embed && (
+        <header className="flex items-center justify-between gap-2 border-b border-[var(--border)] px-4 py-2.5 md:px-6">
+          <div className="flex items-center gap-2">
+            <span className="text-[15px] font-bold">✦ ایجنت لیارا</span>
+            <span className="hidden text-[11px] text-[var(--text-dim)] sm:inline">
+              {mode === "connected" ? "اپراتور حساب شما" : mode === "demo" ? "اپراتور (دمو)" : "دستیار مستندات"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ConnectPanel onChanged={(m) => setMode(m)} />
+            <AboutModal />
+          </div>
+        </header>
+      )}
 
       <div ref={scroller} className="flex-1 space-y-5 overflow-y-auto px-4 pb-6 pt-4 md:px-6">
         {!mounted ? null : !hasSent && messages.length === 0 ? (

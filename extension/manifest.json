@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Liara Agent — اپراتور ابری",
+  "version": "0.1.0",
+  "description": "ایجنت هوشمند لیارا داخل پنل و سایت لیارا — مستندات، عیب‌یابی و مدیریت منابع.",
+  "permissions": ["storage"],
+  "host_permissions": ["https://*.liara.ir/*", "https://*.liara.cloud/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://*.liara.ir/*", "https://*.liara.cloud/*"],
+      "js": ["content.js"],
+      "css": ["bubble.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_title": "Liara Agent" }
+}
