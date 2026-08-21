@@ -32,10 +32,11 @@ the docs site requests our agent server.
    headers) is a later upgrade, not a launch requirement.
 4. Chrome extension remains as-is — a second consumer of the same embed pattern.
 5. **No duplicate docs UI** (product-owner ruling): the docs side is the fork
-   exclusively. The in-app custom reader (plan Tasks 1–3 output) receives no further
-   work, stays runnable during development, and is **deleted at ship** (plan Task 10)
-   once the docs-site deployment is verified. Citations deep-link only to the docs-site
-   origin.
+   exclusively. The in-app custom reader (plan Tasks 1–3 output) was **deleted
+   immediately** on 2026-08-21 (user directive mid-flight): `src/components/docs/`,
+   `/docs/[...slug]` routes, `src/lib/docs-pages.js` and its API routes are gone; `/`
+   redirects to `/chat`. All docs-side features are implemented in `docs-site/`.
+   Citations deep-link only to the docs-site origin.
 
 ## Consequences
 + Judges get the real docs.liara.ir experience with Liri woven in — not a replica.

@@ -705,9 +705,9 @@ git commit -m "feat: Liri widget components on real eve events"
   - `docs-site` patch: `_app.jsx` renders `<script src="${process.env.NEXT_PUBLIC_AGENT_ORIGIN || "https://liara-agent.iran.liara.ir"}/embed.js" data-origin={...} defer />`.
   - Citations with `route` ALWAYS open `${process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN}/${route}` — the fork is the only docs surface (ADR-0008 §5, product-owner ruling: no fallback branch to the in-app reader).
 
-- [ ] **Step 1: Move chat to `/chat` and mount the widget there**
+- [ ] **Step 1: Move chat to `/chat`; `/` becomes a backend landing**
 
-`src/app/chat/page.tsx` = old `src/app/page.tsx` content; the page renders `<LiriWidget surface="docs" scopeLabel="مستندات لیارا" … />` full-page (embed=1 keeps compact chrome). Old `/` keeps the fallback reader (ADR-0008 §5 — deletion decided in Task 10).
+`src/app/chat/page.tsx` = old `src/app/page.tsx` content; the widget mounts full-page there (`?embed=1` keeps compact chrome). The in-app reader was already deleted (user directive, executed as Task 4.5) — `/` is a redirect to `/chat` (server `redirect()`), the backend app's face. Nothing docs-related lives on the agent app.
 
 - [ ] **Step 2: Write `public/embed.js` + docs-site patch**
 
@@ -793,13 +793,12 @@ git commit -m "feat: connected console surface with proactive incident nudge"
 - Modify: `scripts/smoke.mjs`, `README.md`, `CHANGELOG.md`
 - Reference: `docs/adr/0008-docs-repo-as-presentation-layer.md` (already written — do not create a new ADR)
 
-- [ ] **Step 1: Extend smoke** — add checks to `scripts/smoke.mjs` (follow its existing fetch/assert style), written for the post-Step-2 state: `GET /` returns the landing (status 200); `GET /chat` 200; (if `/api/docs/search` kept in Step 2) `GET /api/docs/search?q=nodejs` → `results.length > 0`; (if Task 9 shipped) `GET /console` 200 and `GET /api/liara/apps` → 401 `{connected:false}` unauthenticated. Run: `node scripts/smoke.mjs http://localhost:3000` → `SMOKE OK n/n`.
+- [ ] **Step 1: Extend smoke** — post-deletion state: `GET /` redirects to `/chat` (307/308); `GET /chat` 200; (if Task 9 shipped) `GET /console` 200 and `GET /api/liara/apps` → 401 `{connected:false}` unauthenticated. Run: `node scripts/smoke.mjs http://localhost:3000` → `SMOKE OK n/n`.
 
-- [ ] **Step 2: Delete the duplicate docs UI (ADR-0008 §5)** — once the docs-site deployment is verified: remove `src/components/docs/` (DocsShell/Sidebar/ArticleView), `src/app/docs/[...slug]/`, the `/` reader (root becomes a small landing that links the docs site + `/chat` + `/console`), `src/app/api/docs/nav+page` routes, and `src/lib/docs-pages.js` + its test (dead after reader removal — `urlToRoute` lives independently in `liri-events.js`; `/api/docs/search` stays only if the widget consumes it, else it goes too). Keep `CodeBlock.tsx` (used by Message/AnswerCard). Run `node --test` + `npm run build` + smoke.
+- [ ] **Step 2: README/CHANGELOG** — README: judge guide rewritten for the real topology (primary link = the docs-site deployment with Liri embedded; agent app = `/chat` + `/console` + APIs; extension install), architecture section updated per ADR-0008, `docs-site/PATCHES.md` + sync script documented, prototype folder mentioned as design reference. CHANGELOG entry summarizing the port + pivot.
 
-- [ ] **Step 3: README/CHANGELOG** — README: judge guide rewritten for the real topology (primary link = the docs-site deployment with Liri embedded; agent app = `/chat` + `/console` + APIs; extension install), architecture section updated per ADR-0008, `docs-site/PATCHES.md` + sync script documented, prototype folder mentioned as design reference. CHANGELOG entry summarizing the port + pivot.
 
-- [ ] **Step 4: Full verification gate**
+- [ ] **Step 3: Full verification gate**
 
 ```bash
 node --test            # all unit suites green
@@ -807,7 +806,7 @@ npm run build          # production build clean
 node scripts/smoke.mjs http://localhost:3000
 ```
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add scripts/smoke.mjs README.md CHANGELOG.md
