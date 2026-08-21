@@ -4,6 +4,11 @@ node_modules/
 out/
 dist/
 
+# docs-site (vendored liara-cloud/docs fork, ADR-0008)
+docs-site/node_modules/
+docs-site/.next/
+docs-site/out/
+
 # secrets & local
 .env*
 !.env.example
