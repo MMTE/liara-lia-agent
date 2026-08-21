@@ -809,6 +809,17 @@ git commit -m "docs: ship docs-fork presentation layer; smoke coverage for new s
 
 ---
 
+### Task 11: Rename Liri→Lia + character mascot (ADR-0010)
+
+**Files:**
+- Create: `public/lia/{idle,thinking,alert,worried,success}.png` (512px derivatives from `lia-picture-assets/`), `docs/adr/0010-lia-character.md` (already written)
+- Modify: `src/components/liri/` → `src/components/lia/` (all files, `Liri*`→`Lia*` exports), `src/app/chat/page.tsx`, `src/app/console/page.tsx`, `src/components/console/*` (widget refs + «لیری» copy), `public/embed.js` (bubble badge, `window.Liri`→`window.Lia`, `liri-prefill`→`lia-prefill`), `docs-site/src/components/AskLiri.jsx` → `AskLia.jsx` (+ copy «پرسیدن از لیا درباره این صفحه», `PATCHES.md` entry update), `extension/content.js` (`window.Liri` check → `window.Lia`), `README.md`, `CHANGELOG.md`, `.gitignore` (+`lia-picture-assets/`)
+- Delete: `public/liri.jpg`
+
+**Rules:** every user-facing لیری→لیا / Liri→Lia; «لیارا» (Liara platform) NEVER touched; `STORAGE_KEY` unchanged; both sides of the `lia-prefill` message + `window.Lia` API change atomically in one commit; Mascot gains the `error` mood (ADR-0010 posture table: idle/thinking/alert/worried/aha→success); HomeState greeting «سلام! من لیا هستم». Rebuild docs-site (`NEXT_PUBLIC_AGENT_ORIGIN=http://localhost:3000 yarn build`), restart :3002 serve, verify ask-button + bubble + panel + mood swap in browser; `npm run build`, `node --test`, smoke green.
+
+**Commit:** `git add -A src/components/lia src/components/console src/app public/lia public/embed.js docs-site/src/components/AskLia.jsx docs-site/src/components/AskLiri.jsx docs-site/PATCHES.md extension/content.js README.md CHANGELOG.md .gitignore docs/adr/0010-lia-character.md` + `git rm public/liri.jpg` → `feat: agent is Lia (لیا) — rename + character mascot (ADR-0010)`
+
 ## Self-Review
 
 - **Spec coverage vs rubric:** UI/UX (55) → Tasks 4, 7, 8 (real docs fork + embedded Liri, traces, cards, RTL). Agentic (50) → Tasks 5, 7 (clarify/plan/verify rendering of real HITL), 9 (proactive nudge). Correctness (80) → unchanged retrieval + citation deep-links into the docs fork (Task 8). Security (50) → embed.js is same-script-origin content + iframe (no new trust boundary); Task 9 BFF reuses httpOnly sid + read-only endpoints. Deployment (40) / Cost (25) → two Liara apps (docs fork static export + agent Node app); Task 10 verifies agent app + records docs-site deploy steps.
