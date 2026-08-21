@@ -59,3 +59,7 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
   restartApp/updateEnvs/releasesDeploy. Design note for Task 10: channel AuthFn
   must stamp {principalId: sid, principalType: 'user'} for connected sessions;
   unauthenticated turns resolve the demo token via app-principal auth.
+- 2026-08-21 — Tasks 5+8 done: search_docs/read_doc tools over the dual corpus
+  (BM25+RRF now, cosine bolts on with embeddings), skills (troubleshooting,
+  deployment, docs-research). Live-verified: agent runs Persian→English query
+  reformulation then read_doc on laravel/quick-start and answers with citations.
