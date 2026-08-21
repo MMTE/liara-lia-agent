@@ -1,7 +1,20 @@
+# deps / build
 node_modules/
 .next/
+out/
+dist/
+
+# secrets & local
 .env*
 !.env.example
+.gateway-probe.log
+
+# research clones & caches
 .research/
-dist/
+.cache/
+
+# misc
+.DS_Store
 *.log
+*.tsbuildinfo
+next-env.d.ts
