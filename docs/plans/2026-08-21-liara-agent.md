@@ -34,13 +34,10 @@
 | 4 Corpus + embeddings | ◐ corpus done | `b08515e` — 4,260 chunks (3,748 guides + 512 api-ref), 6.2 MB, idempotent; payload-attr cleaner bug fixed (+933 chunks); embeddings half blocked on Liara AI key |
 | 5 Retrieval tools | ⏳ next | after 4 |
 | 6 OpenAPI connections | ✅ done | `01aeb5c` — vendored specs (41+18 ops, 13 allowed), approval policy, per-principal auth resolver (app-principal fallback keeps demo token reachable), 21/21 tests |
-| 7 HITL verification | ⏳ after 6 | needs DEMO_LIARA_TOKEN (user to provide) |
-| 8 Persona/scenarios | ◐ partial | instructions.md + scenarios.ts committed (`249d6bd`, `d9c4745`); skills/*.md pending |
-| 9 Web UI | ◐ partial | Chat/Message/Citations/ActivityTimeline/composer/empty-state committed (`d9c4745`); browser-verified render + send; polish pending |
-| 10 Panels/security | ⏳ pending | — |
-| 11 Deploy | ⏳ pending | target tonight; self-host facts in spec §4.9 |
-| 12 Extension/smoke | ⏳ pending | — |
-
+| 9 Web UI | ✅ done | `d9c4745`+`a4a456a` — browser-verified: streaming, citations chips, timeline, connect/about panels, usage meter, RTL, hydration fixed, embed mode |
+| 10 Panels/security | ✅ done | `a4a456a` — rate limit verified (429@31 on /eve/), connect API + sid→user-principal AuthFn, health/stats, metering from stream events |
+| 11 Deploy | ⏳ blocked | prod build green (standalone + data tracing); liara CLI 9.5.1 installed; needs user Liara login |
+| 12 Extension/smoke/README | ✅ done | `273c1aa` — MV3 bubble zip, smoke.mjs green 3/3 (settled+citations+tools), README judge guide |
 **Verified baseline:** full agent turn e2e via OrcaRouter (`CHAT_PROVIDER=orca`)
 through `next dev` + withEve + `/eve/v1/session` SSE + useEveAgent client.
 glm-5.2 promo pool 503 (upstream outage — probe watching); OpenRouter needs
