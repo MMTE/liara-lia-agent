@@ -1,21 +1,34 @@
-import { ProxyAgent, setGlobalDispatcher } from "undici";
+import { fetch as undiciFetch, ProxyAgent } from "undici";
 
-// GLM-5.2 eve promo (free through Aug 27, 2026) requires:
-// 1. User-Agent EXACTLY `eve/<version>` (the AI SDK prepends its own products,
-//    which the promo rejects). We rewrite it on gateway calls.
-// 2. Reachability from this network — optionally via HTTPS_PROXY (e.g. a local
-//    proxy when direct egress is blocked).
-const proxy = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
-if (proxy) {
-  setGlobalDispatcher(new ProxyAgent(proxy));
-  console.error(`[loader] egress proxy: ${proxy}`);
-}
+// Egress routing by HOST ALLOWLIST: only these hosts go through the proxy
+// (OpenRouter is geo-blocked direct; the Vercel Gateway promo needs the eve
+// UA rewrite). Everything else — localhost, the eve dev child, workflow
+// self-callbacks, and all Liara APIs (Iran-local) — goes direct. An allowlist
+// is used deliberately: a localhost *denylist* missed URL forms like [::1]
+// and broke withEve's internal relay (empty 400 via proxy).
+const PROXY_HOSTS = new Set(["openrouter.ai", "www.openrouter.ai", "ai-gateway.vercel.sh"]);
+
+const proxyUrl = process.env.EVE_EGRESS_PROXY || process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
+const proxyAgent = proxyUrl ? new ProxyAgent(proxyUrl) : null;
+if (proxyUrl) console.error(`[loader] egress proxy: ${proxyUrl} (hosts: ${[...PROXY_HOSTS].join(", ")})`);
 
 const origFetch = globalThis.fetch.bind(globalThis);
+
 globalThis.fetch = (input, init) => {
+  let host = "";
   try {
-    const url = typeof input === "string" ? input : input?.url || "";
-    if (url.includes("ai-gateway.vercel.sh")) {
+    const url = typeof input === "string" ? input : input?.url ?? "";
+    host = url ? new URL(url).hostname : "";
+  } catch {
+    /* fallthrough */
+  }
+
+  if (!proxyAgent || !PROXY_HOSTS.has(host)) return origFetch(input, init);
+
+  // proxied host → undici fetch with explicit dispatcher (+ gateway UA rewrite)
+  try {
+    const url = typeof input === "string" ? input : input?.url ?? "";
+    if (host === "ai-gateway.vercel.sh") {
       const h = new Headers(
         init?.headers ??
           (typeof input === "object" && "headers" in input ? input.headers : undefined)
@@ -27,8 +40,9 @@ globalThis.fetch = (input, init) => {
         init = { ...(init || {}), headers: h };
       }
     }
+    void url;
   } catch {
     /* never break the call */
   }
-  return origFetch(input, init);
+  return undiciFetch(input, { ...(init || {}), dispatcher: proxyAgent });
 };

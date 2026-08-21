@@ -46,8 +46,8 @@ Next.js 16 (single Liara deployment)
 ```
 
 - **Model**: `zai/glm-5.2` via Vercel AI Gateway (free promo for eve agents through
-  Aug 27) with OpenAI-compatible fallbacks: Liara AI (`ai.liara.ir`), OpenRouter,
-  OrcaRouter — switchable via `CHAT_PROVIDER` env, no code change.
+  Aug 27), optionally pinned to Blackbox with `CHAT_PROVIDER=blackbox`. Liara AI,
+  OpenRouter, and any OpenAI-compatible endpoint are switchable through env only.
 - **Embeddings** (optional semantic channel): Liara AI `multilingual-e5-large`;
   BM25+RRF works standalone when unset.
 

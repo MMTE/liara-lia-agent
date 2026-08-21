@@ -2,14 +2,16 @@ import { defineAgent } from "eve";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { LanguageModel } from "ai";
 
-// Provider selection (ADR-0001): CHAT_PROVIDER=vercel|liara|openrouter|orca,
+// Provider selection: CHAT_PROVIDER=vercel|blackbox|liara|openrouter|openai,
 // optional CHAT_MODEL override. Gateway ids are strings; OpenAI-compatible
 // providers get provider objects. Resolved once at module load.
-function resolveModel(): string | LanguageModel {
-  const provider = process.env.CHAT_PROVIDER ?? "vercel";
-  const chatModel = process.env.CHAT_MODEL;
+const provider = process.env.CHAT_PROVIDER || "vercel";
+const chatModel = process.env.CHAT_MODEL || undefined;
 
+function resolveModel(): string | LanguageModel {
   switch (provider) {
+    case "blackbox":
+      return chatModel ?? "zai/glm-5.2";
     case "liara": {
       const liara = createOpenAICompatible({
         name: "liara-ai",
@@ -26,13 +28,13 @@ function resolveModel(): string | LanguageModel {
       });
       return or.chatModel(chatModel ?? "deepseek/deepseek-chat-v3.1");
     }
-    case "orca": {
-      const orca = createOpenAICompatible({
-        name: "orcarouter",
-        baseURL: process.env.ORCAROUTER_BASE ?? "https://api.orcarouter.ai/v1",
-        apiKey: process.env.ORCAROUTER_API_KEY,
+    case "openai": {
+      const openai = createOpenAICompatible({
+        name: "openai-compatible",
+        baseURL: process.env.OPENAI_BASE_URL ?? "https://api.openai.com/v1",
+        apiKey: process.env.OPENAI_API_KEY,
       });
-      return orca.chatModel(chatModel ?? "orcarouter/auto");
+      return openai.chatModel(chatModel ?? "gpt-4o-mini");
     }
     case "vercel":
     default:
@@ -43,9 +45,12 @@ function resolveModel(): string | LanguageModel {
 
 export default defineAgent({
   model: resolveModel(),
-  // Provider-object models (liara/openrouter/orca) lack Gateway catalog
+  ...(provider === "blackbox"
+    ? { modelOptions: { providerOptions: { gateway: { only: ["blackbox"] } } } }
+    : {}),
+  // Provider-object models lack Gateway catalog
   // metadata; declare a conservative context window so compaction can plan.
-  ...(process.env.CHAT_PROVIDER && process.env.CHAT_PROVIDER !== "vercel"
+  ...(!["vercel", "blackbox"].includes(provider)
     ? { modelContextWindowTokens: 128_000 }
     : {}),
   limits: {

@@ -1,0 +1,15 @@
+{
+	admin off
+	auto_https off
+}
+
+http://127.0.0.1:8787 {
+	respond /healthz 200
+
+	reverse_proxy https://openrouter.ai {
+		header_up Host openrouter.ai
+		transport http {
+			network_proxy url http://127.0.0.1:10808
+		}
+	}
+}

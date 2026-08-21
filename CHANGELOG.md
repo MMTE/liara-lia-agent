@@ -5,6 +5,10 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
 ## [Unreleased]
 
 ### Added
+- 2026-08-21 — OpenRouter egress moved to a local reverse-proxy endpoint:
+  a small Caddy config (127.0.0.1:8787 → openrouter.ai via xray 10808,
+  HTTP CONNECT); `OPENROUTER_BASE` points there. This replaces the custom
+  Node SOCKS/TLS implementation. Gateway probe loop removed.
 - 2026-08-21 — Design spec approved (approach C: Liara Operator + helpdesk extension):
   `docs/specs/2026-08-21-liara-agent-design.md`.
 - 2026-08-21 — Knowledge layer expanded to dual corpus: liara-cloud/docs guides

@@ -146,6 +146,7 @@ export default function Chat() {
 
   // Hydration guard: localStorage-restored events differ from SSR output.
   const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   // ?embed=1 (Chrome extension iframe): compact chrome-less mode
   const [embed] = useState(
     () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("embed") === "1"
@@ -155,6 +156,11 @@ export default function Chat() {
     initialEvents: (saved.events ?? []) as never[],
     initialSession: saved.session as never,
     onFinish(snapshot) {
+      (window as unknown as Record<string, unknown>).__dbgFinish = JSON.stringify({
+        status: snapshot.status,
+        dataMessages: snapshot.data?.messages?.length ?? -1,
+        events: (snapshot.events as unknown[])?.length ?? -1,
+      });
       try {
         localStorage.setItem(
           STORAGE_KEY,
