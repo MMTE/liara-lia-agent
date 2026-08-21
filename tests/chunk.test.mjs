@@ -159,18 +159,29 @@ test("chunkPage splits at H2/H3 and produces complete chunks", () => {
     const fenceMarkers = (c.text.match(/```/g) ?? []).length;
     assert.equal(fenceMarkers % 2, 0, `chunk ${c.id} splits a code fence`);
   }
-  const console_ = chunks.find((c) => c.sectionPath === "استقرار با Liara Console");
-  assert.ok(console_, "H2 section chunk must exist");
-  assert.ok(console_.text.startsWith("## استقرار با Liara Console"));
-  assert.ok(console_.text.includes("### ورود به حساب کاربری"));
   const cli = chunks.find((c) => c.sectionPath === "استقرار با Liara CLI");
   assert.ok(cli, "H2 section chunk must exist");
   assert.ok(cli.text.startsWith("## استقرار با Liara CLI"));
+  assert.ok(cli.text.includes("npm install -g @liara/cli"));
   const nested = chunks.find(
     (c) => c.sectionPath === "استقرار با Liara CLI > ایجاد برنامه",
   );
   assert.ok(nested, "H3 section chunk must exist with nested sectionPath");
   assert.ok(nested.text.startsWith("### ایجاد برنامه"));
+  const login = chunks.find(
+    (c) => c.sectionPath === "استقرار با Liara Console > ورود به حساب کاربری",
+  );
+  assert.ok(login, "H3 section chunk must exist with nested sectionPath");
+  assert.ok(
+    login.text.startsWith("## استقرار با Liara Console"),
+    "heading-only H2 section merges into its first child chunk",
+  );
+  assert.ok(login.text.includes("### ورود به حساب کاربری"));
+  assert.ok(login.text.includes("وارد کنسول لیارا شوید"));
+  assert.ok(
+    chunks.every((c) => c.text.trim().length > 0),
+    "no empty chunks",
+  );
 });
 
 test("chunkPage hard-splits oversized sections at ~1200 chars", () => {
@@ -179,9 +190,13 @@ test("chunkPage hard-splits oversized sections at ~1200 chars", () => {
     (_, i) =>
       `نکته ${i + 1}: برای استقرار بی‌نقص برنامه Flask خود در لیارا، حتماً فایل requirements.txt را به‌روزرسانی کنید، شبکه خصوصی و منابع سخت‌افزاری مناسب انتخاب کنید و سپس دستور liara deploy را اجرا کنید.`,
   ).join("\n\n");
-  const chunks = chunkPage({ ...PAGE, slug: "long", text: `## نکات تکمیلی\n\n${paras}` });
-  assert.ok(chunks.length >= 2, "oversized section must be hard-split");
-  for (const c of chunks) {
+  const longChunks = chunkPage({
+    ...PAGE,
+    slug: "long",
+    text: `## نکات تکمیلی\n\n${paras}`,
+  });
+  assert.ok(longChunks.length >= 2, "oversized section must be hard-split");
+  for (const c of longChunks) {
     assert.ok(c.text.length <= 1200, `chunk ${c.id} exceeds 1200 chars`);
     assert.equal(c.sectionPath, "نکات تکمیلی");
   }

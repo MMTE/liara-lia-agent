@@ -97,14 +97,18 @@ function packBlocks(blocks) {
  * Chunk a cleaned docs page.
  * @param {Page} page
  * @returns {Chunk[]}
+ */
+export function chunkPage(page) {
+  const { slug, url, title, product, source, text } = page;
+  const lines = (text ?? "").replace(/\r\n?/g, "\n").split("\n");
+
   // Group lines into sections at H2/H3 headings (H3 nests under current H2).
   /** @type {{path: string, heading: string | null, body: string[]}[]} */
   const sections = [];
   let h2 = "";
   let cur = { path: "", heading: null, body: [] };
   const pushSection = () => {
-    const hasBody = cur.body.some((l) => l.trim() !== "");
-    if (hasBody || cur.heading) sections.push(cur);
+    if (cur.body.some((l) => l.trim() !== "") || cur.heading) sections.push(cur);
     cur = { path: "", heading: null, body: [] };
   };
   for (const line of lines) {
@@ -128,7 +132,7 @@ function packBlocks(blocks) {
   const chunks = [];
   // Heading-only sections (H2 directly followed by H3) merge forward.
   const pendingHeadings = [];
-  const addChunk = (section, text) => {
+  const addChunk = (sectionPath, chunkText) => {
     chunks.push({
       id: `${slug}#${chunks.length}`,
       slug,
@@ -136,43 +140,27 @@ function packBlocks(blocks) {
       title,
       product,
       source,
-      sectionPath: section.path,
-      text,
+      sectionPath,
+      text: chunkText,
     });
   };
   for (const section of sections) {
-    const hasBody = section.body.some((l) => l.trim() !== "");
-    if (!hasBody) {
+    if (!section.body.some((l) => l.trim() !== "")) {
       if (section.heading) pendingHeadings.push(section.heading);
       continue;
     }
     const parts = packBlocks(toBlocks(section.body));
-    parts.forEach((text, i) => {
+    parts.forEach((chunkText, i) => {
       const prefix =
         i === 0
           ? [...pendingHeadings, section.heading].filter(Boolean).join("\n\n")
           : "";
-      addChunk(section, prefix ? `${prefix}\n\n${text}` : text);
+      addChunk(section.path, prefix ? `${prefix}\n\n${chunkText}` : chunkText);
     });
     pendingHeadings.length = 0;
   }
   if (pendingHeadings.length) {
-    addChunk({ path: sections.at(-1)?.path ?? "" }, pendingHeadings.join("\n\n"));
-  }
-  return chunks;
- }
-    for (const textChunk of packBlocks(toBlocks(section.lines))) {
-      chunks.push({
-        id: `${slug}#${chunks.length}`,
-        slug,
-        url,
-        title,
-        product,
-        source,
-        sectionPath: section.path,
-        text: textChunk,
-      });
-    }
+    addChunk(sections.at(-1)?.path ?? "", pendingHeadings.join("\n\n"));
   }
   return chunks;
 }

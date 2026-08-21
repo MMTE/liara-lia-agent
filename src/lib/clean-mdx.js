@@ -16,8 +16,9 @@ const SELF_CLOSING_TAG = new RegExp(
 const JSX_HEADING = /<h([1-6])((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<\/h\1\s*>/gi;
 // Structural residue lines: only JSX/JS punctuation left after tag removal.
 const STRUCTURE_ONLY = /^[\s()<>\[\]{},;/`'"]+$/;
-// Residue of multi-line JSX attributes (e.g. <Step steps={[ ... }).
 const ATTR_NOISE = /^\s*(?:step|content|tabs)\s*:\s*[^\n]*$/;
+// Line that only OPENS a JSX attribute expression (e.g. `content={[`).
+const ATTR_OPENER = /^[a-zA-Z][\w-]*=\{?\[?$/;
 const UNCLOSED_TAG_LINE = /^\s*<[A-Za-z][^>]*$/;
 // Complete single-line attribute expression: name={...} → keep inner value.
 const ATTR_EXPR = /^(\s*)[a-zA-Z][\w-]*=\{(.*)\}\s*,?\s*$/;
@@ -62,10 +63,10 @@ export function cleanMdx(raw) {
       (line) =>
         !STRUCTURE_ONLY.test(line) &&
         !ATTR_NOISE.test(line) &&
+        !ATTR_OPENER.test(line) &&
         !UNCLOSED_TAG_LINE.test(line),
     )
     .join("\n");
-
   s = s.replace(/\u0000(\d+)\u0000/g, (_, i) => fences[Number(i)] ?? "");
   return s.replace(/\n{3,}/g, "\n\n").trim();
 }

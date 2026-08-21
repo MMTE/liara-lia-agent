@@ -19,6 +19,10 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
 - 2026-08-21 — Retrieval primitives (Task 2): Persian normalization +
   tokenizer, Okapi BM25 index, RRF fusion in `src/lib/` with node:test
   coverage (`tests/retrieval.test.mjs`).
+- 2026-08-21 — Docs corpus preprocessing (Task 3): MDX cleaner (imports,
+  `<Head>`, JSX → plain markdown; code fences verbatim) + H2/H3-aware
+  chunker with ~1200-char hard split, fence-safe (`src/lib/`,
+  `tests/chunk.test.mjs`).
 - 2026-08-21 — Provider matrix expanded (ADR-0001 addendum): OpenRouter (tests,
   deepseek-chat-v3.1 verified $0.25/M) + OrcaRouter (orcarouter/auto verified,
   deepseek-v4 credit). User authorized paid budget use on Gateway (~$5) and
