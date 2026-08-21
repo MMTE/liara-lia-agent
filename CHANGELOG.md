@@ -27,6 +27,16 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
   deepseek-chat-v3.1 verified $0.25/M) + OrcaRouter (orcarouter/auto verified,
   deepseek-v4 credit). User authorized paid budget use on Gateway (~$5) and
   OpenRouter. Gateway glm-5.2 promo still 503; persistent probe running.
+- 2026-08-21 — Docs corpus builder (Task 4, corpus half):
+  `scripts/build-docs-corpus.mjs` → `src/data/docs-chunks.json` — dual corpus,
+  4,260 chunks from 1,142 Persian guide pages (liara-cloud/docs clone, URL
+  map per sitemap) + 201 api-ref pages (developers.liara.ir llms.txt, /spec/
+  excluded, concurrency-8 fetches disk-cached in `.cache/apiref/`).
+- 2026-08-21 — cleanMdx fix surfaced by the corpus build: array/fragment
+  payload attrs (`Tabs content`, `Step steps`, `Table headers/data`,
+  `QuestionBox answer`) are hoisted before tag-stripping, and multi-line
+  icon imports are stripped — 458/1143 pages previously lost most of their
+  body text to self-closing-tag deletion (`tests/clean-mdx-payload.test.mjs`).
 - 2026-08-21 — **Eve runtime verified e2e**: full agent turn via OrcaRouter
   (CHAT_PROVIDER=orca) through next dev + withEve + /eve/v1/session stream +
   useEveAgent client. glm-5.2 promo 503 is upstream (probe watching);
