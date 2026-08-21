@@ -36,3 +36,11 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
   live execution-status table now.
 - 2026-08-21 — Chat UI checkpoint (d9c4745): RTL Persian, Vazirmatn (local),
   scenarios, activity timeline, citation chips, HITL approval cards, streaming.
+- 2026-08-21 — Liara OpenAPI connections (Task 6): vendored paas/dbaas specs
+  (`scripts/vendor-liara-specs.mjs` → `agent/specs/*.json`), eve connections
+  with curated read + three write ops behind native user-approval policy
+  (`agent/lib/liara-approval.ts`), per-session token chain
+  principal→session-store→DEMO_LIARA_TOKEN (`agent/lib/liara-auth.ts`,
+  `src/lib/session-store.js`), connect-validation client
+  (`src/lib/liara-client.js`, 3 tests). tsc + `eve info` green; both
+  connections discovered in the compiled manifest.
