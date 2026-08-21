@@ -5,6 +5,29 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
 ## [Unreleased]
 
 ### Added
+- 2026-08-22 — Liri experience port shipped. Presentation layer moved to a
+  vendored fork of liara-cloud/docs (`docs-site/`, ADR-0008): the real
+  docs site loads `public/embed.js` from the agent origin — ✦ bubble +
+  panel iframe (`/chat?embed=1`) — plus a per-page ask button
+  «پرسیدن از لیری درباره این صفحه» (`AskLiri.jsx` → `window.Liri.open`).
+  In-app docs reader + ⌘K palette deleted; `/` redirects to `/chat`
+  preserving the query; citations deep-link into the fork origin
+  (`NEXT_PUBLIC_DOCS_SITE_ORIGIN`).
+- 2026-08-22 — `/chat` is now the full-page Liri widget (streaming answers,
+  tool traces, clarify/plan/verify HITL cards, scenario chips) with an
+  embed-aware scope label: «دستیار مستندات لیارا» under `?embed=1`,
+  «ایجنت لیارا» otherwise.
+- 2026-08-22 — `/console` connected surface: demo hero, real apps list +
+  detail via read-only BFF (`/api/liara/*`, httpOnly sid, 401
+  `{connected:false}` gate), and a proactive Liri nudge on unhealthy
+  deployments.
+- 2026-08-22 — Usage meter debug-gated behind `NEXT_PUBLIC_USAGE_METER`
+  (ADR-0009): hidden + zero `/api/stats` polling in production.
+- 2026-08-22 — Docs-fork sync tooling: `scripts/sync-docs-site.mjs` +
+  `docs-site/PATCHES.md` (sha256 drift guards, pre+post-rsync patch
+  verification; patches are intentionally stripped on sync — restore via git
+  and reapply). Smoke script now covers the new topology: `/` → 307
+  `/chat`, `/chat` + `/console` 200, `/api/liara/apps` 401 unauthenticated.
 - 2026-08-21 — OpenRouter egress moved to a local reverse-proxy endpoint:
   a small Caddy config (127.0.0.1:8787 → openrouter.ai via xray 10808,
   HTTP CONNECT); `OPENROUTER_BASE` points there. This replaces the custom

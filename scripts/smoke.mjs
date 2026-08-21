@@ -47,7 +47,34 @@ async function runTurn(prompt) {
   throw new Error("turn did not settle in 180s");
 }
 
+// --- post-port topology: /chat is the app, /console the connected surface ---
+function check(name, ok, detail) {
+  console.log(`${ok ? "✓" : "✖"} ${name}${detail ? `: ${detail}` : ""}`);
+  if (!ok) failed += 1;
+}
+
 let failed = 0;
+
+const rootRes = await fetch(`${BASE}/`, { redirect: "manual" });
+const rootLocation = rootRes.headers.get("location") ?? "";
+check(
+  "/ redirects to /chat",
+  [307, 308].includes(rootRes.status) && new URL(rootLocation, BASE).pathname === "/chat",
+  `${rootRes.status} ${rootLocation}`
+);
+
+for (const path of ["/chat", "/console"]) {
+  const res = await fetch(`${BASE}${path}`);
+  check(`GET ${path} → 200`, res.status === 200, `status=${res.status}`);
+}
+
+const appsRes = await fetch(`${BASE}/api/liara/apps`);
+const appsBody = await appsRes.json().catch(() => ({}));
+check(
+  "GET /api/liara/apps → 401 {connected:false} unauthenticated",
+  appsRes.status === 401 && appsBody.connected === false,
+  `status=${appsRes.status} connected=${appsBody.connected}`
+);
 
 const health = await fetch(`${BASE}/api/health`).then((r) => r.json());
 console.log(`health: ok=${health.ok} mode=${health.mode} provider=${health.chatProvider} chunks=${health.corpus?.chunks}`);

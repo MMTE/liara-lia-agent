@@ -5,8 +5,22 @@ export const metadata = {
 };
 
 // Full-page Liri mount: the panel renders inline (no floating bubble) and
-// fills the viewport. ?embed=1 (docs-site iframe / extension) needs no extra
-// handling — there is no page-level chrome around the widget in any mode.
-export default function ChatPage() {
-  return <LiriWidget fullPage surface="docs" scopeLabel="ایجنت لیارا" />;
+// fills the viewport. Read server-side from searchParams (same pattern as
+// src/app/page.tsx) so the correct scope label renders on first paint.
+export default async function ChatPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  // ?embed=1 (docs-site iframe / extension) → docs-assistant branding;
+  // direct visits keep the agent branding.
+  const embed = params.embed === "1";
+  return (
+    <LiriWidget
+      fullPage
+      surface="docs"
+      scopeLabel={embed ? "دستیار مستندات لیارا" : "ایجنت لیارا"}
+    />
+  );
 }
