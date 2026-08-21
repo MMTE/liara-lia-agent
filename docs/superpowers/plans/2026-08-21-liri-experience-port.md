@@ -692,40 +692,34 @@ git commit -m "feat: Liri widget components on real eve events"
 
 ---
 
-### Task 8: Embed wiring — Liri inside the docs fork (ADR-0008)
+### Task 8a: Embed Liri into docs-site — early, pre-widget (P0)
 
 **Files:**
-- Create: `public/embed.js` (agent origin; vanilla JS, no build step), `src/app/chat/page.tsx` (moved current home)
-- Modify: `docs-site/src/pages/_app.jsx` (create — upstream has none; loads embed.js), `docs-site/PATCHES.md` (append patch entry), `src/components/liri/LiriPanel.tsx` or `AnswerCard.tsx` citation handler (Task 7 output) for docs-site deep links
+- Create: `public/embed.js`, `src/app/chat/page.tsx` (moved current home), `docs-site/src/components/AskLiri.jsx` (new file, patch), `docs-site/src/pages/_app.jsx` (new file, patch)
+- Modify: `src/app/page.tsx` (redirect to /chat), `docs-site/PATCHES.md`
 
 **Interfaces:**
-- Consumes: `LiriWidget` (Task 7) mounted at `/chat` (full-page, `?embed=1` compact), `docs-site/` build (Task 4), extension (unchanged).
-- Produces:
-  - `embed.js`: self-configuring loader — reads `document.currentScript.dataset.origin` (default same-origin), injects fixed RTL bubble («✦ لیری») bottom-left + iframe panel `<origin>/chat?embed=1`, Escape/click-outside closes, inline styles only (must render inside the docs fork's Tailwind scope without depending on it).
-  - `docs-site` patch: `_app.jsx` renders `<script src="${process.env.NEXT_PUBLIC_AGENT_ORIGIN || "https://liara-agent.iran.liara.ir"}/embed.js" data-origin={...} defer />`.
-  - Citations with `route` ALWAYS open `${process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN}/${route}` — the fork is the only docs surface (ADR-0008 §5, product-owner ruling: no fallback branch to the in-app reader).
+- `embed.js` (vanilla JS, agent origin): bubble + iframe panel (`<origin>/chat?embed=1`), AND a public API — `window.Liri = { open(prefill?: string), close() }` — so docs-site UI can trigger the assistant. Inline styles only.
+- `docs-site` patches (both recorded in PATCHES.md with `upstream-sha256:none`): `_app.jsx` loads embed.js (`NEXT_PUBLIC_AGENT_ORIGIN`); `AskLiri.jsx` renders «✦ پرسیدن از لیری درباره این صفحه» (RTL, styled to match their header/article chrome) on every docs page, onClick → `window.Liri.open('درباره «' + pageTitle + '» توضیح بده — نکات مهم و خطاهای رایج را بگو')` where pageTitle comes from `document.title` (their layout sets it per page).
+- Citations in the existing Chat UI: `Citations` component opens `NEXT_PUBLIC_DOCS_SITE_ORIGIN + '/' + route` when env set, else plain external `citation.url`.
 
-- [ ] **Step 1: Move chat to `/chat`; `/` becomes a backend landing**
+**Verification (P0 gate):** rebuild docs-site with `NEXT_PUBLIC_AGENT_ORIGIN=http://localhost:3000`, serve on :3002 → on a Persian page: ask-button visible → click → panel opens with prefilled prompt → send → cited answer → citation click lands on the docs-site page. `/` on :3000 redirects to `/chat`. Screenshots.
 
-`src/app/chat/page.tsx` = old `src/app/page.tsx` content; the widget mounts full-page there (`?embed=1` keeps compact chrome). The in-app reader was already deleted (user directive, executed as Task 4.5) — `/` is a redirect to `/chat` (server `redirect()`), the backend app's face. Nothing docs-related lives on the agent app.
+**Commit:** `git add public/embed.js src/app/page.tsx src/app/chat docs-site/src/components/AskLiri.jsx docs-site/src/pages/_app.jsx docs-site/PATCHES.md src/components/Citations.tsx` → `feat: Liri embedded in docs fork — bubble + per-page ask button (ADR-0008)`
 
-- [ ] **Step 2: Write `public/embed.js` + docs-site patch**
+### Task 8b: Widget wiring on /chat + citation deep links (after Task 7)
 
-Port the injection logic from `extension/content.js` (bubble/panel/iframe/close) into `public/embed.js` with: RTL-aware positioning (`left: 20px; bottom: 20px`), a Liri-branded bubble (mascot `public/liri.jpg` from agent origin, 52px round, shadow), panel `width: min(420px, calc(100vw - 24px)); height: min(660px, 78vh)`, `iframe.src = origin + "/chat?embed=1"`. Create `docs-site/src/pages/_app.jsx` (`export default function App({ Component, pageProps })` + the script tag + `<Component {...pageProps} />`); append the patch entry to `PATCHES.md`.
+- [ ] **Step 1: Mount LiriWidget full-page on `/chat`** — `/chat` renders `<LiriWidget surface="docs" scopeLabel="مستندات لیارا" … />` (Task 7 component) instead of the legacy Chat; `?embed=1` keeps compact chrome for the iframe. Legacy `Chat.tsx` and its Message/HITL cards are deleted (clean cutover — widget supersedes them; UsageMeter/ConnectPanel/CodeBlock/turn-meter stay).
 
-- [ ] **Step 3: Citation deep links**
+- [ ] **Step 2: AnswerCard citations** — same rule as Task 8a's Citations change: `route` → `NEXT_PUBLIC_DOCS_SITE_ORIGIN + '/' + route` (new tab), unset env → plain external link to `citation.url`.
 
-AnswerCard citation clicks and the Chat UI's existing `Citations` component → `window.open(docsSiteOrigin + "/" + route, "_blank")` with `docsSiteOrigin = process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN` (required env for this behavior; if unset, render citations as plain external links to `citation.url` — never route to the in-app reader).
+- [ ] **Step 3: End-to-end re-verification (P0 gate)** — on :3002: bubble → panel now shows the Liri widget UI (mascot header, tool traces, answer cards); «پرسیدن از لیری درباره این صفحه» still opens panel prefilled; write path shows PlanCard approve flow; extension unchanged. Screenshots.
 
-- [ ] **Step 4: End-to-end verification (P0 gate)**
-
-Agent dev on :3000 (already running); rebuild docs-site with `NEXT_PUBLIC_AGENT_ORIGIN=http://localhost:3000 yarn build` and serve `out/` on :3002. In a browser on `localhost:3002`: Liri bubble visible on every docs page → click → iframe panel loads `/chat?embed=1` → ask «چطور یک برنامه Node.js را دیپلوی کنم؟» → tool trace streams → cited answer → citation click lands on the docs-site page for that path. Also verify the extension still opens against `/chat?embed=1`. Screenshots of each state.
-
-- [ ] **Step 5: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add public/embed.js src/app/chat src/components/liri docs-site/src/pages/_app.jsx docs-site/PATCHES.md
-git commit -m "feat: Liri embedded in the docs fork via agent-origin loader (ADR-0008)"
+git add src/app/chat src/components/liri src/components/Chat.tsx src/components/Message.tsx src/components/HitlCard.tsx
+git commit -m "feat: Liri widget replaces legacy chat on /chat"
 ```
 
 
