@@ -1,0 +1,221 @@
+{
+  "version": "1.0.0",
+  "steps": {
+    "dist/src/execution/cancel-descendant-turns-step.js": {
+      "cancelDescendantTurnsStep": {
+        "stepId": "step//eve@0.42.0//cancelDescendantTurnsStep"
+      }
+    },
+    "dist/src/execution/create-session-step.js": {
+      "createSessionStep": {
+        "stepId": "step//eve@0.42.0//createSessionStep"
+      }
+    },
+    "dist/src/execution/delegated-parent-notification.js": {
+      "notifyDelegatedParentStep": {
+        "stepId": "step//eve@0.42.0//notifyDelegatedParentStep"
+      },
+      "notifyTurnCallerStep": {
+        "stepId": "step//eve@0.42.0//notifyTurnCallerStep"
+      },
+      "notifyCancelledTaskCallerStep": {
+        "stepId": "step//eve@0.42.0//notifyCancelledTaskCallerStep"
+      },
+      "notifyTaskTurnStartedStep": {
+        "stepId": "step//eve@0.42.0//notifyTaskTurnStartedStep"
+      },
+      "resolveInitialTurnCallerStep": {
+        "stepId": "step//eve@0.42.0//resolveInitialTurnCallerStep"
+      },
+      "bindTurnCallerContextStep": {
+        "stepId": "step//eve@0.42.0//bindTurnCallerContextStep"
+      }
+    },
+    "dist/src/execution/dispatch-runtime-actions-step.js": {
+      "dispatchRuntimeActionsStep": {
+        "stepId": "step//eve@0.42.0//dispatchRuntimeActionsStep"
+      }
+    },
+    "dist/src/execution/dispatch-turn-step.js": {
+      "dispatchTurnStep": {
+        "stepId": "step//eve@0.42.0//dispatchTurnStep"
+      }
+    },
+    "dist/src/execution/dispatch-workflow-runtime-actions-step.js": {
+      "dispatchWorkflowRuntimeActionsStep": {
+        "stepId": "step//eve@0.42.0//dispatchWorkflowRuntimeActionsStep"
+      }
+    },
+    "dist/src/execution/forward-turn-cancellation-step.js": {
+      "forwardTurnCancellationStep": {
+        "stepId": "step//eve@0.42.0//forwardTurnCancellationStep"
+      }
+    },
+    "dist/src/execution/forward-turn-delivery-step.js": {
+      "forwardTurnDeliveryStep": {
+        "stepId": "step//eve@0.42.0//forwardTurnDeliveryStep"
+      }
+    },
+    "dist/src/execution/proxied-deliver-step.js": {
+      "routeProxiedDeliverStep": {
+        "stepId": "step//eve@0.42.0//routeProxiedDeliverStep"
+      }
+    },
+    "dist/src/execution/report-dropped-wire-payload-step.js": {
+      "reportDroppedWirePayloadStep": {
+        "stepId": "step//eve@0.42.0//reportDroppedWirePayloadStep"
+      }
+    },
+    "dist/src/execution/session-callback-step.js": {
+      "fireTaskEventCallbackStep": {
+        "stepId": "step//eve@0.42.0//fireTaskEventCallbackStep"
+      },
+      "fireTaskUpdateCallbackStep": {
+        "stepId": "step//eve@0.42.0//fireTaskUpdateCallbackStep"
+      },
+      "fireSessionCallbackStep": {
+        "stepId": "step//eve@0.42.0//fireSessionCallbackStep"
+      }
+    },
+    "dist/src/execution/session-timeout-steps.js": {
+      "startSessionTimeoutStep": {
+        "stepId": "step//eve@0.42.0//startSessionTimeoutStep"
+      },
+      "signalSessionTimeoutStep": {
+        "stepId": "step//eve@0.42.0//signalSessionTimeoutStep"
+      },
+      "cancelSessionTimeoutStep": {
+        "stepId": "step//eve@0.42.0//cancelSessionTimeoutStep"
+      }
+    },
+    "dist/src/execution/settle-cancelled-turn-step.js": {
+      "settleCancelledTurnStep": {
+        "stepId": "step//eve@0.42.0//settleCancelledTurnStep"
+      }
+    },
+    "dist/src/execution/subagent-adapter.js": {
+      "forwardSubagentAuthorizationEventStep": {
+        "stepId": "step//eve@0.42.0//forwardSubagentAuthorizationEventStep"
+      },
+      "forwardSubagentInputRequestStep": {
+        "stepId": "step//eve@0.42.0//forwardSubagentInputRequestStep"
+      }
+    },
+    "dist/src/execution/subagent-event-proxy-step.js": {
+      "runProxySubagentEventStep": {
+        "stepId": "step//eve@0.42.0//runProxySubagentEventStep"
+      },
+      "emitRecordedTaskInputRequestStep": {
+        "stepId": "step//eve@0.42.0//emitRecordedTaskInputRequestStep"
+      },
+      "emitRecordedTaskAuthorizationEventStep": {
+        "stepId": "step//eve@0.42.0//emitRecordedTaskAuthorizationEventStep"
+      }
+    },
+    "dist/src/execution/tasks/child/steps.js": {
+      "appendTaskViewStep": {
+        "stepId": "step//eve@0.42.0//appendTaskViewStep"
+      },
+      "wakeTaskAuthorizationParentStep": {
+        "stepId": "step//eve@0.42.0//wakeTaskAuthorizationParentStep"
+      },
+      "wakeTaskParentStep": {
+        "stepId": "step//eve@0.42.0//wakeTaskParentStep"
+      },
+      "wakeTaskUpdateParentStep": {
+        "stepId": "step//eve@0.42.0//wakeTaskUpdateParentStep"
+      },
+      "wakeTaskInputRequestParentStep": {
+        "stepId": "step//eve@0.42.0//wakeTaskInputRequestParentStep"
+      },
+      "deliverTaskInputResponsesStep": {
+        "stepId": "step//eve@0.42.0//deliverTaskInputResponsesStep"
+      }
+    },
+    "dist/src/execution/tasks/parent/delegate.js": {
+      "acknowledgeDelegatedTasksStep": {
+        "stepId": "step//eve@0.42.0//acknowledgeDelegatedTasksStep"
+      }
+    },
+    "dist/src/execution/tasks/parent/dispatch-task-step.js": {
+      "dispatchTaskStep": {
+        "stepId": "step//eve@0.42.0//dispatchTaskStep"
+      }
+    },
+    "dist/src/execution/tasks/parent/hitl-proxy-steps.js": {
+      "recordTaskInputRequestStep": {
+        "stepId": "step//eve@0.42.0//recordTaskInputRequestStep"
+      },
+      "acceptTaskAuthorizationEventStep": {
+        "stepId": "step//eve@0.42.0//acceptTaskAuthorizationEventStep"
+      },
+      "recordTerminalTaskViewsStep": {
+        "stepId": "step//eve@0.42.0//recordTerminalTaskViewsStep"
+      }
+    },
+    "dist/src/execution/terminal-session-completion-step.js": {
+      "emitTerminalSessionCompletionStep": {
+        "stepId": "step//eve@0.42.0//emitTerminalSessionCompletionStep"
+      }
+    },
+    "dist/src/execution/terminal-session-failure-step.js": {
+      "emitTerminalSessionFailureStep": {
+        "stepId": "step//eve@0.42.0//emitTerminalSessionFailureStep"
+      }
+    },
+    "dist/src/execution/terminate-child-sessions-step.js": {
+      "terminateChildSessionsStep": {
+        "stepId": "step//eve@0.42.0//terminateChildSessionsStep"
+      }
+    },
+    "dist/src/execution/turn-control-protocol.js": {
+      "sendTurnControlStep": {
+        "stepId": "step//eve@0.42.0//sendTurnControlStep"
+      }
+    },
+    "dist/src/execution/workflow-steps.js": {
+      "turnStep": {
+        "stepId": "step//eve@0.42.0//turnStep"
+      }
+    }
+  },
+  "workflows": {
+    "dist/src/execution/session-timeout-workflow.js": {
+      "sessionTimeoutWorkflow": {
+        "graph": {
+          "edges": [],
+          "nodes": []
+        },
+        "workflowId": "workflow//eve//sessionTimeoutWorkflow"
+      }
+    },
+    "dist/src/execution/workflow-entry.js": {
+      "workflowEntry": {
+        "graph": {
+          "edges": [],
+          "nodes": []
+        },
+        "workflowId": "workflow//eve//workflowEntry"
+      }
+    },
+    "dist/src/execution/tasks/child/workflow.js": {
+      "taskRunWorkflow": {
+        "graph": {
+          "edges": [],
+          "nodes": []
+        },
+        "workflowId": "workflow//eve//taskRunWorkflow"
+      }
+    },
+    "dist/src/execution/turn-workflow.js": {
+      "turnWorkflow": {
+        "graph": {
+          "edges": [],
+          "nodes": []
+        },
+        "workflowId": "workflow//eve//turnWorkflow"
+      }
+    }
+  },
+  "classes": {}
+}

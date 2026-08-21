@@ -1,0 +1,29 @@
+{
+  "runId": "wrun_01M0H9H55C1BPDPQD0MS030YS9",
+  "deploymentId": "mt2gchuy-582fc765-b61a-4db5-9310-672f51304af4",
+  "workflowName": "workflow//eve//workflowEntry",
+  "specVersion": 6,
+  "executionContext": {
+    "traceCarrier": {
+      "traceparent": "00-7e741ffe2bd0ea010db3b80f7f59fd0b-f2cb15e19d389e43-01"
+    },
+    "workflowCoreVersion": "5.0.0-beta.43",
+    "features": {
+      "encryption": false
+    },
+    "hookResumeInputVersion": 1
+  },
+  "input": {
+    "__type": "Uint8Array",
+    "data": "ZGV2bFtbMV0seyJpbnB1dCI6MiwibGltaXRzIjotMSwic2VyaWFsaXplZENvbnRleHQiOjR9LHsibWVzc2FnZSI6MywiY29udGV4dCI6LTEsIm91dHB1dFNjaGVtYSI6LTF9LCJTYXkgZXhhY3RseTogQUdFTlQgVFVSTiBPSyIseyJldmUuYnVuZGxlIjo1LCJldmUuY2hhbm5lbCI6OCwiZXZlLmNoYW5uZWxJbnN0cnVtZW50YXRpb24iOjExLCJldmUubW9kZSI6MTQsImV2ZS5hdXRoIjoxNSwiZXZlLmluaXRpYXRvckF1dGgiOjE1LCJldmUuY2FwYWJpbGl0aWVzIjoxOCwiZXZlLmNoYW5uZWxEZWxpdmVyeSI6MjB9LHsibm9kZUlkIjotMSwic291cmNlIjo2fSx7ImtpbmQiOjd9LCJkZXZlbG9wbWVudCIseyJraW5kIjo5LCJzdGF0ZSI6MTB9LCJodHRwIix7fSx7ImtpbmQiOjEyLCJtZXRhZGF0YSI6MTN9LCJjaGFubmVsOmV2ZSIse30sImNvbnZlcnNhdGlvbiIseyJhdHRyaWJ1dGVzIjoxNiwiYXV0aGVudGljYXRvciI6MTcsInByaW5jaXBhbElkIjoxNywicHJpbmNpcGFsVHlwZSI6MTd9LHt9LCJsb2NhbC1kZXYiLHsicmVxdWVzdElucHV0IjoxOX0sdHJ1ZSx7ImNoYW5uZWxLaW5kIjoxMiwiY2hhbm5lbE5hbWUiOjIxLCJkZWxpdmVyeUlkIjoyMn0sImV2ZSIsIjdmNDEyM2JmLTI3NTEtNDRkYi04YWZhLTg4MjI1M2I3MjEyNiJd"
+  },
+  "createdAt": "2026-08-21T04:33:40.018Z",
+  "status": "running",
+  "startedAt": "2026-08-21T04:33:40.065Z",
+  "updatedAt": "2026-08-21T04:33:40.065Z",
+  "attributes": {
+    "$eve.type": "session",
+    "$eve.trigger": "http",
+    "$eve.title": "Say exactly: AGENT TURN OK"
+  }
+}
