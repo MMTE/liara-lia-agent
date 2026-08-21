@@ -24,5 +24,8 @@ docs-site/out/
 *.tsbuildinfo
 next-env.d.ts
 
+# local git worktrees
+.worktrees/
+
 # eve local runtime state (mount .eve/.workflow-data on the host, never commit)
 .eve/
