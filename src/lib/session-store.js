@@ -9,8 +9,11 @@
 
 /** @typedef {{token: string, mode: string}} SessionRecord */
 
-/** @type {Map<string, SessionRecord>} */
-const sessions = new Map();
+// globalThis-pinned singleton: the eve agent bundle (rolldown) and the Next
+// server bundle each get their own module instance — without this pin they
+// would hold two separate Maps and the connect route could not reach the
+// connection auth resolver.
+const sessions = (globalThis.__liaraAgentSessions ??= new Map());
 
 /** @param {string} sid @param {SessionRecord} record */
 export function set(sid, record) {

@@ -4,6 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEveAgent } from "eve/react";
 import { SCENARIOS } from "@/lib/scenarios";
 import Message, { type ChatMessage } from "./Message";
+import ConnectPanel from "./ConnectPanel";
+import UsageMeter from "./UsageMeter";
+import AboutModal from "./AboutModal";
 
 interface HitlOption {
   id: string;
@@ -44,7 +47,10 @@ function pendingHitl(messages: ChatMessage[]): HitlRequest[] {
           ? req.options
               .filter(isObj)
               .filter((o) => typeof o.id === "string")
-              .map((o) => ({ id: o.id as string, label: typeof o.label === "string" ? o.label : (o.id as string) }))
+              .map((o) => ({
+                id: o.id as string,
+                label: typeof o.label === "string" ? o.label : (o.id as string),
+              }))
           : [],
       });
     }
@@ -55,7 +61,7 @@ function pendingHitl(messages: ChatMessage[]): HitlRequest[] {
 function HitlCard({ request, onAnswer }: { request: HitlRequest; onAnswer: (optionId: string) => void }) {
   const isApproval = request.kind === "tool-approval";
   return (
-    <div className="w-full rounded-2xl border border-[var(--warn)] bg-[#fbbf2412] px-4 py-3 md:w-[78%] mr-auto">
+    <div className="mr-auto w-full rounded-2xl border border-[var(--warn)] bg-[#fbbf2412] px-4 py-3 md:w-[78%]">
       <div className="mb-1 flex items-center gap-2 text-[13px] font-bold text-[var(--warn)]">
         {isApproval ? "⚠️ نیاز به تأیید شما" : "❓ سوال ایجنت"}
       </div>
@@ -90,6 +96,43 @@ function Typing() {
   );
 }
 
+/** Post per-turn usage (parsed from stream events) to the stats endpoint. */
+function meterTurn(events: unknown[], status: string): void {
+  try {
+    let tokensIn = 0;
+    let tokensOut = 0;
+    let cacheRead = 0;
+    const tools: string[] = [];
+    for (const raw of events) {
+      if (!isObj(raw) || typeof raw.type !== "string" || !isObj(raw.data)) continue;
+      if (raw.type === "step.completed" && isObj(raw.data.usage)) {
+        const u = raw.data.usage as Record<string, unknown>;
+        tokensIn += typeof u.inputTokens === "number" ? u.inputTokens : 0;
+        tokensOut += typeof u.outputTokens === "number" ? u.outputTokens : 0;
+        cacheRead += typeof u.cacheReadTokens === "number" ? u.cacheReadTokens : 0;
+      }
+      if (raw.type === "actions.requested" && Array.isArray(raw.data.actions)) {
+        for (const a of raw.data.actions as unknown[]) {
+          if (isObj(a) && typeof a.toolName === "string") tools.push(a.toolName);
+        }
+      }
+    }
+    void fetch("/api/stats", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tokensIn,
+        tokensOut,
+        cacheReadTokens: cacheRead,
+        tools,
+        error: status === "error",
+      }),
+    });
+  } catch {
+    /* metering best-effort */
+  }
+}
+
 export default function Chat() {
   const [saved] = useState<SavedChat>(() => {
     if (typeof window === "undefined") return {};
@@ -100,6 +143,10 @@ export default function Chat() {
       return {};
     }
   });
+
+  // Hydration guard: localStorage-restored events differ from SSR output.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const agent = useEveAgent({
     initialEvents: (saved.events ?? []) as never[],
@@ -113,11 +160,13 @@ export default function Chat() {
       } catch {
         /* storage full — non-fatal */
       }
+      meterTurn(snapshot.events as unknown[], snapshot.status);
     },
   });
 
   const [draft, setDraft] = useState("");
   const [hasSent, setHasSent] = useState(false);
+  const [mode, setMode] = useState<string>("docs");
   const scroller = useRef<HTMLDivElement>(null);
   const isBusy = agent.status === "submitted" || agent.status === "streaming";
   const messages = useMemo(() => agent.data.messages as ChatMessage[], [agent.data.messages]);
@@ -148,13 +197,24 @@ export default function Chat() {
 
   return (
     <div className="mx-auto flex h-[100dvh] max-w-4xl flex-col">
+      <header className="flex items-center justify-between gap-2 border-b border-[var(--border)] px-4 py-2.5 md:px-6">
+        <div className="flex items-center gap-2">
+          <span className="text-[15px] font-bold">✦ ایجنت لیارا</span>
+          <span className="hidden text-[11px] text-[var(--text-dim)] sm:inline">
+            {mode === "connected" ? "اپراتور حساب شما" : mode === "demo" ? "اپراتور (دمو)" : "دستیار مستندات"}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <ConnectPanel onChanged={(m) => setMode(m)} />
+          <AboutModal />
+        </div>
+      </header>
+
       <div ref={scroller} className="flex-1 space-y-5 overflow-y-auto px-4 pb-6 pt-4 md:px-6">
-        {!hasSent && messages.length === 0 ? (
+        {!mounted ? null : !hasSent && messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-6 px-2 text-center">
             <div>
-              <h1 className="mb-2 text-2xl font-bold md:text-3xl">
-                ✦ ایجنت لیارا
-              </h1>
+              <h1 className="mb-2 text-2xl font-bold md:text-3xl">✦ ایجنت لیارا</h1>
               <p className="max-w-lg text-[14px] leading-8 text-[var(--text-dim)]">
                 اپراتور هوشمند ابر لیارا — مستندات را می‌خواند، به حساب شما وصل می‌شود،
                 لاگ و دیپلوی را بررسی می‌کند و تا رفع مشکل همراه‌تان است.
@@ -193,7 +253,6 @@ export default function Chat() {
         )}
       </div>
 
-      {/* scenario chips row (after first message) */}
       {hasSent && (
         <div className="flex gap-1.5 overflow-x-auto px-4 pb-2 md:px-6 [scrollbar-width:none]">
           {SCENARIOS.map((s) => (
@@ -210,7 +269,6 @@ export default function Chat() {
         </div>
       )}
 
-      {/* composer */}
       <div className="border-t border-[var(--border)] bg-[var(--bg)] px-4 py-3 md:px-6">
         <form
           onSubmit={(e) => {
@@ -250,6 +308,17 @@ export default function Chat() {
             </button>
           )}
         </form>
+        <div className="mt-2 flex items-center justify-between">
+          <UsageMeter />
+          <a
+            href="https://docs.liara.ir"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[11px] text-[var(--text-dim)] hover:text-[var(--accent)]"
+          >
+            docs.liara.ir
+          </a>
+        </div>
       </div>
     </div>
   );
