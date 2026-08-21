@@ -11,3 +11,8 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
   (Persian) + developers.liara.ir API reference (~170 clean-markdown pages via llms.txt).
 - 2026-08-21 — ADRs 0001–0006: provider chain, Eve framework, embedded hybrid search,
   write approval gate, session token handling, extension scope.
+- 2026-08-21 — ADR-0007: eve spike complete. Liara tools via OpenAPI
+  connections (vendored specs, operation allow-list), native HITL approvals
+  replace the custom two-step gate, per-session tokens via channel auth +
+  connection getToken. glm-5.2 promo outage observed (provider-side);
+  mitigation CHAT_PROVIDER=liara.

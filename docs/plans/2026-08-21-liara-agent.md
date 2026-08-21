@@ -188,34 +188,27 @@ export default defineTool({
 - [ ] **Step 3:** Verify in dev chat: «چطور برنامه لاراول رو دیپلوی کنم؟» → citations to docs.liara.ir URLs in results; English "how do update-envs work" → api-ref page.
 - [ ] **Step 4:** Commit `feat: hybrid retrieval tools`
 
-### Task 6: Liara client + read tools
+### Task 6: Liara OpenAPI connections (read + write ops)
 
 **Files:**
-- Create: `src/lib/liara-client.js` (plain ESM + JSDoc), `src/lib/session-store.js`, `src/lib/truncate.js`, `agent/tools/liara/*.ts` (8 read tools)
-- Test: `tests/liara-client.test.mjs` (mocked global fetch)
+- Create: `scripts/vendor-liara-specs.mjs`, `agent/specs/paas.json` + `dbaas.json` (vendored, git-committed), `src/lib/session-store.js`, `src/lib/liara-client.js` (connect-validation only), `agent/lib/liara-approval.ts`, `agent/connections/liara-paas.ts`, `agent/connections/liara-dbaas.ts`
 
-**Interfaces:**
-- Produces: `liaraFetch(path, {method, body, token})` → parsed JSON, throws `LiaraError {status, message}`; read tools: `list_apps`, `get_app`, `get_app_logs` (capped 8 KB, `since` default 24 h), `get_app_events`, `get_app_releases`, `get_app_metrics` (param `kind: summary|cpu|memory|network`), `list_databases`, `get_database`. Token resolution per ADR-0007 mechanism: session → demo fallback; no token → tools return `{error:"not_connected", hint}` that instructions.md tells the agent to surface as a connect prompt.
+**Interfaces (ADR-0007):**
+- Produces: connections with tools `liara-paas__{getApps, getAppByName, getAppLogs, getAppEvents, getAppReleases, getAppCpuReports, getAppMemoryReports, getAppSummaryReports, restartApp, updateEnvs, releasesDeploy}` and `liara-dbaas__{getListDatabases, getDatabase}`; `sessionStore.get(sid) → {token, mode} | null`; `liaraApproval(ctx)` → reads `not-applicable`, writes `user-approval`; `validateToken(token) → {ok, apps}`.
 
-- [ ] **Step 1: Failing tests** — correct URL/method/headers for 3 endpoints; 401 → LiaraError; log truncation keeps last N lines with `… (truncated)` marker.
-- [ ] **Step 2:** Implement + tests green.
-- [ ] **Step 3:** Wire tools with zod schemas; descriptions state units and caps ("returns last 500 lines").
-- [ ] **Step 4:** Dev-chat verify with user's real token in `.env` (`DEMO_LIARA_TOKEN`): "لیست اپ‌هام رو نشون بده" → real app names.
-- [ ] **Step 5:** Commit `feat: liara read tools`
+- [ ] **Step 1:** `scripts/vendor-liara-specs.mjs`: download paas.yaml + dbaas.yaml from liara-cloud/openapi@main, convert YAML→JSON (use `yaml` pkg as devDep), write to `agent/specs/`. Run it, commit output.
+- [ ] **Step 2:** `liara-approval.ts**: `WRITES = new Set(["restartApp","updateEnvs","releasesDeploy"])`; policy extracts op from qualified `toolName`, returns approval status.
+- [ ] **Step 3:** Connections: inline `spec` import, `baseUrl: process.env.LIARA_API_BASE`, `operations.allow` list, `auth.getToken` via session store → demo-token fallback, `approval: liaraApproval`. No token anywhere in tool results (errors mapped to `{error:"not_connected"}`).
+- [ ] **Step 4:** Dev-chat verify with `DEMO_LIARA_TOKEN` in `.env`: "لیست اپ‌ها رو نشون بده" → real apps; "لاگ‌های X رو بیار" → logs.
+- [ ] **Step 5:** Commit `feat: liara openapi connections with approval policy`
 
-### Task 7: Write tools + approval gate
+### Task 7: HITL verification (native approvals)
 
-**Files:**
-- Create: `src/lib/approvals.js`, `agent/tools/liara/restart_app.ts`, `update_envs.ts`, `redeploy.ts`
-- Test: `tests/approvals.test.mjs`
+**Files:** none new — verification task.
 
-**Interfaces:**
-- Produces: `proposeAction(sessionId, {kind, params, summary}): actionId` (TTL 10 min); `resolveAction(sessionId, actionId, consentSeen: boolean)` → executes via liara-client or throws. Tools take `{appName, confirm?: {actionId, userConsented}}`: without `confirm` → returns proposal; with valid `confirm` + server-observed consent → executes. Server observes consent: the last user message before the execute call must contain an affirmation (بله/آره/yes/تایید/اجازه) — checked by the tool from transcript context per ADR-0007; if Eve exposes native HITL, prefer it and record in ADR-0004 addendum.
-
-- [ ] **Step 1: Failing tests** — proposal without consent returns pending; consent + wrong actionId rejected; happy path executes mocked fetch exactly once; TTL expiry rejected.
-- [ ] **Step 2:** Implement + green.
-- [ ] **Step 3:** Dev verify: "اپ my-app رو ری‌استرت کن" → agent proposes → user «بله» → real restart on demo account → agent verifies via `get_app`.
-- [ ] **Step 4:** Commit `feat: approval-gated write tools`
+- [ ] **Step 1:** Dev-chat: "اپ X رو ری‌استرت کن" → agent proposes → approval pauses at `session.waiting` → approve → real restart executes → agent verifies via `getAppByName`. Cancel path: no mutation.
+- [ ] **Step 2:** Verify `ask_question` renders options for an ambiguous request ("کدوم اپ؟").
+- [ ] **Step 3:** Record evidence (screenshot/notes) in CHANGELOG; commit.
 
 ### Task 8: Agent persona, skills, demo scenarios
 
