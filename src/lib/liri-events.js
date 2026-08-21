@@ -16,6 +16,7 @@ export const TOOL_META = {
   updateEnvs: { label: "تغییر متغیرهای محیطی", kind: "write" },
   releasesDeploy: { label: "استقرار دوباره", kind: "write" },
   getListDatabases: { label: "دریافت فهرست دیتابیس‌ها", kind: "read" },
+  ask_question: { label: "پرسش از کاربر", kind: "read" },
   getDatabase: { label: "خواندن وضعیت دیتابیس", kind: "read" },
 };
 
@@ -103,7 +104,7 @@ export function mapConversation(messages) {
           changes: [{ tool: meta.key, label: meta.label, risk: meta.kind === "write" ? "caution" : "safe", detail: inputDetail(meta.key, p.input) }],
           options, status: "pending",
         });
-      } else {
+      } else if (p.state === "approval-requested") {
         out.push({ id: `${m.id}-clarify-${req.requestId}`, kind: "clarify", requestId: req.requestId, question, options, answered: null });
       }
     }

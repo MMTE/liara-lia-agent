@@ -74,3 +74,21 @@ test("summarizeOutput handles known and unknown shapes", () => {
   assert.ok(summarizeOutput("getApps", { projects: [{}, {}] }).includes("۲"));
   assert.equal(summarizeOutput("unknown_tool", { foo: 1 }), "");
 });
+
+test("resolved ask-question emits no clarify", () => {
+  const out = mapConversation([
+    agentMsg([{ type: "dynamic-tool", toolName: "ask_question", state: "output-available",
+      toolMetadata: { eve: { inputRequest: { requestId: "r3", kind: "ask-question",
+        prompt: "کدام برنامه؟", options: [{ id: "a", label: "my-api" }] } } } }]),
+  ]);
+  assert.equal(out.find((m) => m.kind === "clarify"), undefined);
+});
+
+test("ask_question trace step uses Persian label", () => {
+  const out = mapConversation([
+    agentMsg([{ type: "dynamic-tool", toolName: "ask_question", state: "running",
+      toolMetadata: { eve: { inputRequest: { requestId: "r4", kind: "ask-question", prompt: "q", options: [] } } } }]),
+  ]);
+  const trace = out.find((m) => m.kind === "trace");
+  assert.equal(trace.steps[0].label, "پرسش از کاربر");
+});
