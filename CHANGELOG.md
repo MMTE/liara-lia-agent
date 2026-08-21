@@ -44,3 +44,8 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
   `src/lib/session-store.js`), connect-validation client
   (`src/lib/liara-client.js`, 3 tests). tsc + `eve info` green; both
   connections discovered in the compiled manifest.
+- 2026-08-21 — Task 6 verified & done (01aeb5c): Liara OpenAPI connections
+  compiled into the agent (eve info clean), 21/21 tests, approval policy gates
+  restartApp/updateEnvs/releasesDeploy. Design note for Task 10: channel AuthFn
+  must stamp {principalId: sid, principalType: 'user'} for connected sessions;
+  unauthenticated turns resolve the demo token via app-principal auth.

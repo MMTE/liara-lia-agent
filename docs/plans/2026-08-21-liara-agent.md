@@ -33,7 +33,7 @@
 | 3 MDX cleaner/chunker | ✅ done | `1e25420` — 6 tests; JSX headings → markdown. Payload-attr bug (Tabs/Step self-closing attrs dropped → 458/1143 pages empty) found by CorpusBuilder; being fixed with regression tests |
 | 4 Corpus + embeddings | 🔄 running | CorpusBuilder: corpus half (embeddings deferred until Liara AI key) |
 | 5 Retrieval tools | ⏳ next | after 4 |
-| 6 OpenAPI connections | 🔄 running | LiaraConnections: vendored specs + approval policy + session store |
+| 6 OpenAPI connections | ✅ done | `01aeb5c` — vendored specs (41+18 ops, 13 allowed), approval policy, per-principal auth resolver (app-principal fallback keeps demo token reachable), 21/21 tests |
 | 7 HITL verification | ⏳ after 6 | needs DEMO_LIARA_TOKEN (user to provide) |
 | 8 Persona/scenarios | ◐ partial | instructions.md + scenarios.ts committed (`249d6bd`, `d9c4745`); skills/*.md pending |
 | 9 Web UI | ◐ partial | Chat/Message/Citations/ActivityTimeline/composer/empty-state committed (`d9c4745`); browser-verified render + send; polish pending |
