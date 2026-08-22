@@ -44,6 +44,7 @@
     "#lia-selection{position:fixed;direction:rtl;display:flex;align-items:center;gap:2px;background:#23252d;border:1px solid #2c333f;border-radius:10px;box-shadow:0 10px 32px rgba(0,0,0,.45);padding:3px;z-index:" +
     Z_SELECTION +
     ";opacity:0;transition:opacity .12s;pointer-events:none;}" +
+    "#lia-selection.lia-on{opacity:1;pointer-events:auto;}" +
     "#lia-selection button{border:none;background:transparent;color:#e8eaed;font:500 12.5px/1.6 inherit;font-family:inherit;padding:5px 9px;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}" +
     "#lia-selection button:hover{background:rgba(255,255,255,.08);color:#28c1f5;}" +
     "#lia-selection .lia-sep{width:1px;align-self:stretch;margin:4px 0;background:rgba(255,255,255,.12);}" +
