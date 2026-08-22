@@ -16,7 +16,18 @@ function inspectProvider(env) {
   const result = spawnSync(process.execPath, ["--input-type=module", "--eval", script], {
     cwd: process.cwd(),
     encoding: "utf8",
-    env: { ...process.env, ...env },
+    // Drop ambient provider config from .env so chain resolution depends
+    // only on what the individual test sets (a stray AVALAI_API_KEY would
+    // turn the single-model openai chain into a FallbackModel without
+    // .config; CHAT_MODEL_CHAIN would override the chain under test).
+    env: {
+      ...Object.fromEntries(
+        Object.entries(process.env).filter(
+          ([k]) => !/^(AVALAI|LIARA_AI|OPENROUTER|OPENAI|AI_GATEWAY)_API_KEY$|^CHAT_MODEL_CHAIN$/.test(k),
+        ),
+      ),
+      ...env,
+    },
   });
   assert.equal(result.status, 0, result.stderr);
   return JSON.parse(result.stdout);

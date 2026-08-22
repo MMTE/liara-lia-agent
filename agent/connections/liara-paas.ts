@@ -1,39 +1,22 @@
 import { defineOpenAPIConnection } from "eve/connections";
 
 import paasSpec from "../specs/paas.json";
-import { liaraApproval } from "../lib/liara-approval";
-import { liaraConnectionAuth, liaraTeamScopeArgs } from "../lib/liara-auth";
+import { liaraConnectionConfig } from "../lib/liara-auth";
 
 /**
  * Liara PaaS (application hosting) connection. Vendored spec
  * (liara-cloud/openapi@main, pinned by scripts/vendor-liara-specs.mjs).
  *
- * Curated surface (ADR-0004): app inspection reads + logs/events/releases/
- * metrics, and exactly three write operations — restartApp, updateEnvs,
- * releasesDeploy — which `liaraApproval` gates behind native user approval.
- * Delete-class operations are never exposed.
+ * Full surface (ADR-0004 v2): every operation is exposed — apps, deploys,
+ * domains+SSL, disks, FTPs, backups, reports, settings. All reads run
+ * freely; every non-GET pauses for native user approval
+ * (agent/lib/liara-approval.ts).
  */
 export default defineOpenAPIConnection({
   spec: paasSpec,
-  baseUrl: process.env.LIARA_API_BASE,
-  description:
-    "Liara PaaS: list and inspect apps, read logs, events, releases, and CPU/memory/summary metrics, update environment variables, redeploy from a release, and restart an app. Mutating calls (restart, env update, deploy) require user approval. Persian users call apps «برنامه».",
-  auth: liaraConnectionAuth(),
-  toolCall: { providedArguments: liaraTeamScopeArgs() },
-  approval: liaraApproval,
-  operations: {
-    allow: [
-      "getApps",
-      "getAppByName",
-      "getAppLogs",
-      "getAppEvents",
-      "getAppReleases",
-      "getAppCpuReports",
-      "getAppMemoryReports",
-      "getAppSummaryReports",
-      "restartApp",
-      "updateEnvs",
-      "releasesDeploy",
-    ],
-  },
+  ...liaraConnectionConfig({
+    baseUrl: process.env.LIARA_API_BASE,
+    description:
+      "Liara PaaS (اپ‌ها): full app lifecycle — list/inspect apps, logs, events, releases, metrics; create/delete/turn/restart apps; deploy from sources or releases; manage domains (create, set, redirect, SSL on/off), disks (create/resize/backups/FTPs), and per-app settings (envs, plan, subdomain, static IP, read-only, zero-downtime). Persian users call apps «برنامه». Mutations require user approval.",
+  }),
 });

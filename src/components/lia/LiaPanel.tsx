@@ -9,7 +9,7 @@ import { ClarifyCard } from "./ClarifyCard";
 import { HomeState } from "./HomeState";
 import { Mascot } from "./Mascot";
 import { PlanCard } from "./PlanCard";
-import { ToolTrace } from "./ToolTrace";
+import { matchCommands, resolveCommandPrompt } from "../../lib/lia-commands";
 import type { LiaAgentHandle } from "./useLiaAgent";
 import type { LiaMessage, LiaResourceState, LiaSurface } from "./types";
 
@@ -52,7 +52,9 @@ export function LiaPanel({
   // the bottom. Once they scroll up to read, never yank them back down.
   const stickRef = useRef(true);
   const taRef = useRef<HTMLTextAreaElement>(null);
-  const [mode, setMode] = useState<"connected" | "demo" | "docs" | null>(null);
+  // Slash-command palette state: -1 = no selection.
+  const [paletteIndex, setPaletteIndex] = useState(-1);
+  const commandMatches = matchCommands(draft);
 
   // Lia embed (docs-site): the host page prefills the composer via
   // postMessage { type: "lia-prefill", text } — never auto-sends.
@@ -114,10 +116,13 @@ export function LiaPanel({
 
   const submit = () => {
     if (draft.trim().length === 0 || agent.isBusy) return;
+    // Slash-command: expand to its prompt template (unknown /x → verbatim).
+    const expanded = resolveCommandPrompt(draft) ?? draft;
     // Sending implies "jump to the new turn" — re-arm the follow.
     stickRef.current = true;
-    agent.ask(draft);
+    agent.ask(expanded);
     setDraft("");
+    setPaletteIndex(-1);
   };
 
   // Console mode sync: connect/disconnect inside the widget panel also
@@ -328,10 +333,37 @@ export function LiaPanel({
 
       {view === "chat" && (
         <div className="border-t border-[var(--border)] bg-[var(--bg-raised)] p-2.5">
-          {agent.status === "error" && (
-            <div className="mb-2 rounded-xl border border-[var(--err)] bg-[var(--err)]/10 px-3 py-2 text-center text-[12px] text-[var(--err)]">
-              خطا در ارتباط با ایجنت: {agent.error?.message ?? "نامشخص"} — دوباره تلاش کنید
-            </div>
+          {commandMatches.length > 0 && (
+            <ul
+              dir="rtl"
+              role="listbox"
+              aria-label="دستورهای لیا"
+              className="mb-1.5 max-h-52 overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--bg)]/80 p-1"
+            >
+              {commandMatches.map((c, i) => (
+                <li key={c.command}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={i === (paletteIndex >= 0 ? paletteIndex : 0)}
+                    onClick={() => {
+                      setDraft(`/${c.command} `);
+                      setPaletteIndex(-1);
+                      taRef.current?.focus();
+                    }}
+                    className={`flex w-full items-baseline gap-2 rounded-xl px-2.5 py-1.5 text-start text-[12px] transition ${
+                      i === (paletteIndex >= 0 ? paletteIndex : 0)
+                        ? "bg-[var(--accent)]/15 text-[var(--text)]"
+                        : "text-[var(--text-dim)] hover:bg-[var(--bg)]"
+                    }`}
+                  >
+                    <span dir="ltr" className="font-mono text-[11.5px] text-[var(--accent)]">/{c.command}</span>
+                    {c.args && <span dir="ltr" className="font-mono text-[10.5px] text-[var(--text-dim)]">&lt;{c.args}&gt;</span>}
+                    <span className="min-w-0 flex-1 truncate">{c.description}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
           )}
           <form
             onSubmit={(e) => {
@@ -344,14 +376,36 @@ export function LiaPanel({
               ref={taRef}
               value={draft}
               rows={1}
-              onChange={(e) => setDraft(e.target.value)}
+              onChange={(e) => {
+                setDraft(e.target.value);
+                setPaletteIndex(-1);
+              }}
               onKeyDown={(e) => {
+                if (commandMatches.length > 0) {
+                  const sel = paletteIndex >= 0 ? paletteIndex : 0;
+                  if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    setPaletteIndex((sel + 1) % commandMatches.length);
+                    return;
+                  }
+                  if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    setPaletteIndex((sel - 1 + commandMatches.length) % commandMatches.length);
+                    return;
+                  }
+                  if (e.key === "Tab") {
+                    e.preventDefault();
+                    setDraft(`/${commandMatches[sel]!.command} `);
+                    setPaletteIndex(-1);
+                    return;
+                  }
+                }
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   submit();
                 }
               }}
-              placeholder={agent.isBusy ? "لیا در حال کار است…" : "از لیا بپرسید…"}
+              placeholder={agent.isBusy ? "لیا در حال کار است…" : "بپرسید یا / برای دستورها…"}
               aria-label="پیام به لیا"
               className="max-h-[120px] min-h-[38px] flex-1 resize-none bg-transparent py-1.5 text-[13px] text-[var(--text)] outline-none placeholder:text-[var(--text-dim)]"
             />

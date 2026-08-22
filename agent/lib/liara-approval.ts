@@ -1,20 +1,40 @@
 import type { ApprovalContext, ApprovalStatus } from "eve/tools";
+import ops from "../specs/ops.json" with { type: "json" };
 
 /**
- * Liara operations that mutate state (ADR-0004: two-step approval gate,
- * now native eve HITL per ADR-0007 §2). Everything else is read-only and
- * runs without a prompt.
- */
-export const WRITES = new Set(["restartApp", "updateEnvs", "releasesDeploy"]);
-/**
- * Shared approval policy for both Liara connections: strip the connection
- * prefix (`liara-paas__restartApp` → `restartApp`); read operations return
- * "not-applicable" and run freely, the three write operations return
- * "user-approval" and pause the run at `session.waiting` until the user
- * decides (durable native HITL, ADR-0007 §2).
+ * Method-based approval gate (ADR-0004 v2: full API surface).
+ *
+ * Every Liara connection shares this policy. Classification comes from the
+ * vendored operations manifest (scripts/vendor-liara-specs.mjs → ops.json),
+ * keyed by service (parsed from the qualified tool name) + operationId:
+ *
+ *   GET              → not-applicable (runs without a prompt)
+ *   everything else  → user-approval (native HITL pause; the model must
+ *                      have stated the intended change first)
+ *
+ * Delete/irreversible-class operations get the same native gate — severity
+ * is enforced by instructions (agent must name the resource + warn it is
+ * irreversible before calling), not by a second mechanism.
  */
 export function liaraApproval(ctx: ApprovalContext): ApprovalStatus {
-  const operation = ctx.toolName.replace(/^liara-(?:paas|dbaas)__/, "");
-  return WRITES.has(operation) ? "user-approval" : "not-applicable";
+  const sep = ctx.toolName.indexOf("__");
+  if (sep === -1) return "not-applicable";
+  const service = ctx.toolName.slice(0, sep).replace(/^liara-/, "");
+  const operation = ctx.toolName.slice(sep + 2);
+  const entry = (ops as Record<string, Record<string, { method: string }>>)[service]?.[operation];
+  if (!entry) return "not-applicable"; // unknown op → nothing to gate
+  return entry.method === "GET" ? "not-applicable" : "user-approval";
 }
 
+/** Operations that destroy or irreversibly change state — surfaced to the
+ * instructions layer so the agent words its pre-approval summary as a
+ * destruction warning. Derived from ops.json at module load (static,
+ * string-keyed → Record, not Set). */
+export const DESTRUCTIVE: Readonly<Record<string, true>> = Object.fromEntries(
+  Object.entries(ops as Record<string, Record<string, { method: string; path: string }>>).flatMap(
+    ([service, operations]) =>
+      Object.entries(operations)
+        .filter(([, op]) => op.method === "DELETE" || /\b(unfreeze|resetVMPassword)\b/.test(op.path))
+        .map(([operation]) => [`liara-${service}__${operation}`, true as const]),
+  ),
+);

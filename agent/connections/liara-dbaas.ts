@@ -1,25 +1,21 @@
 import { defineOpenAPIConnection } from "eve/connections";
 
 import dbaasSpec from "../specs/dbaas.json";
-import { liaraApproval } from "../lib/liara-approval";
-import { liaraConnectionAuth, liaraTeamScopeArgs } from "../lib/liara-auth";
+import { liaraConnectionConfig } from "../lib/liara-auth";
 
 /**
  * Liara DBaaS (managed databases) connection. Vendored spec
  * (liara-cloud/openapi@main, pinned by scripts/vendor-liara-specs.mjs).
  *
- * Read-only surface (ADR-0004): list databases and inspect one.
- * Create/delete/scale operations are deliberately not exposed.
+ * Full surface (ADR-0004 v2): list/inspect databases, power on/off,
+ * resize, settings, control-panel & public-network toggles, backups
+ * (create/list/download), events and all report types.
  */
 export default defineOpenAPIConnection({
   spec: dbaasSpec,
-  baseUrl: process.env.LIARA_API_BASE,
-  description:
-    "Liara DBaaS managed databases: list the account's databases and inspect a single database's details. Read-only; provisioning and deletion are not exposed. Persian users call databases «دیتابیس».",
-  auth: liaraConnectionAuth(),
-  toolCall: { providedArguments: liaraTeamScopeArgs() },
-  approval: liaraApproval,
-  operations: {
-    allow: ["getListDatabases", "getDatabase"],
-  },
+  ...liaraConnectionConfig({
+    baseUrl: process.env.LIARA_API_BASE,
+    description:
+      "Liara DBaaS (دیتابیس‌ها): managed MySQL/MariaDB/PostgreSQL/Redis — list/inspect, power on/off, resize (plan change), engine settings, control-panel & public network toggles, backups (create/list/download), events, CPU/memory/network/summary reports. Persian users call databases «دیتابیس». Mutations require user approval.",
+  }),
 });

@@ -5,9 +5,10 @@ import type {
   TokenResult,
 } from "eve/connections";
 import { getForPrincipal } from "../../src/lib/session-store.js";
+import { liaraApproval } from "./liara-approval";
 
 /**
- * Shared auth for both Liara connections (ADR-0007 §1).
+ * Shared auth for every Liara account connection (ADR-0007 §1).
  *
  * Token chain, resolved per tool invocation — the model never sees tokens:
  *   1. connected session: `principal` (eve projects the caller as
@@ -38,6 +39,13 @@ async function getToken({ principal }: {
  * across callers), everyone else gets an app-scoped provider that resolves
  * the demo token.
  */
+export function liaraConnectionAuth(): ConnectionAuthDefinition {
+  return (ctx) =>
+    ctx.session.auth.current?.principalType === "user"
+      ? { principalType: "user", getToken }
+      : { principalType: "app", getToken };
+}
+
 /**
  * Team scope for demo/app-principal calls (see scripts/vendor-liara-specs.mjs):
  * the platform API needs ?teamID= for tokens that are not team-bound
@@ -56,9 +64,47 @@ export function liaraTeamScopeArgs() {
   };
 }
 
-export function liaraConnectionAuth(): ConnectionAuthDefinition {
-  return (ctx) =>
-    ctx.session.auth.current?.principalType === "user"
-      ? { principalType: "user", getToken }
-      : { principalType: "app", getToken };
+/**
+ * App-scoped auth for the Liara AI inference connection: one workspace API
+ * key from env (the account connections above stay per-user/demo). Fails
+ * with `not_connected` when the key is missing so the model can tell the
+ * user which env to set.
+ */
+export function liaraAiKeyAuth(): ConnectionAuthDefinition {
+  return {
+    principalType: "app",
+    getToken: async (): Promise<TokenResult> => {
+      const key = process.env.LIARA_AI_API_KEY;
+      if (key) return { token: key };
+      throw new Error("not_connected");
+    },
+  };
+}
+
+/** Workspace ID for the AI inference path parameter — deployment config,
+ * never a model decision. Null when unset (call fails auth first). */
+export function liaraAiWorkspaceArg() {
+  return {
+    workspaceID: (): string | null => process.env.LIARA_AI_WORKSPACE_ID ?? null,
+  };
+}
+
+/**
+ * Config factory shared by every Liara OpenAPI connection (ADR-0004 v2):
+ * one place for auth, approval, and team-scope wiring. Per-service files
+ * carry only spec + description (+ optional env baseUrl override).
+ */
+export function liaraConnectionConfig(options: {
+  readonly description: string;
+  readonly baseUrl?: string;
+  readonly auth?: ConnectionAuthDefinition;
+  readonly providedArguments?: ReturnType<typeof liaraTeamScopeArgs>;
+}) {
+  return {
+    description: options.description,
+    baseUrl: options.baseUrl,
+    auth: options.auth ?? liaraConnectionAuth(),
+    toolCall: { providedArguments: options.providedArguments ?? liaraTeamScopeArgs() },
+    approval: liaraApproval,
+  };
 }

@@ -5,6 +5,32 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
 ## [Unreleased]
 
 ### Added
+- 2026-08-22 — **Full Liara API surface (ADR-0004 v2).** Agent operates
+  all nine services — PaaS, DBaaS, DNS, Object Storage, Mail, IaaS, plus
+  Liara AI (account/workspaces+keys+logs+playground, public model
+  catalog, OpenAI-compatible inference) — 184 operations vendored from
+  liara-cloud/openapi (`scripts/vendor-liara-specs.mjs` v2: 9 specs, AI
+  spec merges, teamID + bearer normalization, `ops.json` manifest,
+  duplicate-operationId dedupe). Approval gate is method-based from the
+  manifest: GET runs free, every non-GET (98 ops) pauses for native user
+  approval; destructive-class ops additionally require the agent to name
+  the resource + irreversibility before the call (instructions
+  §Parameter discipline: never invent param values, list-then-act,
+  closed enums, omit unset optionals, opaque IDs only from tool output,
+  read-back verification). File Browser & Database Inspector stay
+  unexposed (per-resource dynamic hosts).
+- 2026-08-22 — **Slash-commands in the widget.** Typing `/` opens a
+  filterable palette (`/apps`, `/logs <name>`, `/dbs`, `/zones`,
+  `/buckets`, `/vms`, `/mailservers`, `/ai …`, `/usage`, `/help`, …)
+  with keyboard nav (↑/↓/Tab); commands expand to deterministic
+  operational prompts handled by the agent's command contract
+  (`src/lib/lia-commands.ts`).
+- 2026-08-22 — **Reasoning-first model chain.** Live tool-arg probe
+  (`scripts/probe-reasoning-models.mjs`, 6 realistic cases × 4 models):
+  gpt-5.6-sol 5/6 exact + 1 safe refusal vs deepseek v4 flash/pro/
+  reasoner 1/6 (mis-shaped required params, invented optionals). Default
+  avalai chain is now `gpt-5.6-sol → deepseek-v4-pro → deepseek-v4-flash`
+  (envs: `CHAT_MODEL_CHAIN`).
 - 2026-08-22 — Answers reference the exact docs section: the corpus now
   carries per-chunk `anchor`s (from `<Section id>` tags in the MDX, via a
   clean-mdx → `## title {#id}` → chunker pipeline), `search_docs`/`read_doc`

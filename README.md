@@ -39,7 +39,7 @@ The presentation layer is the **real docs site**: a vendored fork of
 | **Per-page ask button** | On every docs-fork page: «✦ پرسیدن از لیا درباره این صفحه» prefills the composer with a question about that page's title. |
 | **Incident diagnosis** | Connect your account → the agent inspects releases, logs, events and metrics via Liara's official API, correlates with docs, and reports root cause + evidence + fix. On `/console` an unhealthy deployment triggers a proactive nudge. |
 | **Connected console** | `/console` = your real Liara apps (BFF passthrough, read-only) + the Lia widget with surface context. |
-| **Guided fixes with approval** | Mutations (restart / env change / redeploy) pause for your explicit approval — Eve's durable HITL. Destructive operations are not exposed at all. |
+| **Full API operation** | All nine Liara services via vendored OpenAPI connections (apps, databases, DNS, buckets, mail servers, VMs, AI workspaces/models/inference): reads answered from the live account, every mutation behind native approval with pre-call summaries and post-call read-back. Slash-commands (`/apps`, `/logs …`) for one-keystroke operation. |
 | **Clarifying questions** | Ambiguous requests trigger native `ask_question` prompts with option buttons. |
 | **Context memory** | Durable sessions survive restarts; follow-ups like «لاگ‌هاش رو نشون بده» resolve against the pinned app. |
 | **Security** | Per-IP+session rate limiting (verified 429), tokens memory-only + never logged, session token budgets, tool-output caps. |
@@ -64,18 +64,27 @@ docs-site (static, fork of liara-cloud/docs)     agent (this repo — Node app)
 
 - **Agent internals**: Eve agent (`agent/`) with durable sessions, HITL
   approvals, skills; `tools/search_docs` + `read_doc` over the embedded hybrid
-  index; `connections/liara-paas` + `liara-dbaas` from vendored official
-  OpenAPI specs (operation allow-list, approval policy on the three write ops);
-  skills for troubleshooting, deployment, docs-research.
+  index; **the full Liara API surface as OpenAPI connections** — PaaS, DBaaS,
+  DNS, Object Storage, Mail, IaaS, and Liara AI (workspaces/keys/logs/
+  playground, model catalog, OpenAI-compatible inference): 184 operations
+  vendored from liara-cloud/openapi (`scripts/vendor-liara-specs.mjs`), with a
+  method-based approval gate (GET runs free; every non-GET pauses for native
+  user approval) and parameter-discipline rules in the instructions; skills
+  for troubleshooting, deployment, docs-research. Chat composer supports
+  slash-commands (`/apps`, `/logs <name>`, `/dbs`, `/zones`, `/buckets`,
+  `/vms`, `/mailservers`, `/ai`, `/usage`, `/help`).
 - **Embed contract**: `public/embed.js` (agent origin) renders the bubble +
   panel iframe and exposes `window.Lia = { open(prefill), close() }`. The
   panel accepts `postMessage {type:"lia-prefill"}` from the app's own origin
   and the configured docs origin (in local dev without the env, additionally
   the embedding referrer's origin — non-production only). `?embed=1` switches
   the widget's scope label to «دستیار مستندات لیارا».
-- **Model**: `zai/glm-5.2` via Vercel AI Gateway, optionally pinned to
-  Blackbox with `CHAT_PROVIDER=blackbox`. Liara AI, OpenRouter, and any
-  OpenAI-compatible endpoint are switchable through env only.
+- **Model**: reasoning-first fallback chain (`agent/lib/model-chain.ts`):
+  `gpt-5.6-sol → deepseek-v4-pro → deepseek-v4-flash` on Avalai (chosen by a
+  live tool-arg probe — see `scripts/probe-reasoning-models.mjs`), or
+  Vercel AI Gateway / Blackbox (`CHAT_PROVIDER=vercel|blackbox`,
+  `zai/glm-5.2`), Liara AI, OpenRouter — all switchable through env only
+  (`CHAT_MODEL_CHAIN`).
 - **Embeddings** (optional semantic channel): Liara AI `multilingual-e5-large`;
   BM25+RRF works standalone when unset.
 
@@ -110,13 +119,15 @@ usage-meter gate) · `CHANGELOG.md` · `docs/plans/` (execution log) ·
 
 ```bash
 cp .env.example .env   # set CHAT_PROVIDER + provider key
-npm i
 npm run dev            # http://localhost:3000 — /chat, /console
 node scripts/smoke.mjs http://localhost:3000
-node --test            # 60 unit tests
+node --test
 ```
 
 Docs corpus rebuild: `node scripts/build-docs-corpus.mjs` (idempotent, cached).
+Re-vendor API specs after upstream changes: `node scripts/vendor-liara-specs.mjs`
+(regenerates the 9 spec JSONs + `agent/specs/ops.json` for the approval gate).
+
 Docs-site dev server: `cd docs-site && yarn dev` (set
 `NEXT_PUBLIC_AGENT_ORIGIN=http://localhost:3000` to point the embed at the
 local agent).

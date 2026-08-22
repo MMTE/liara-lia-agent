@@ -70,7 +70,10 @@ const registry: Record<string, (modelId?: string) => LanguageModelV4 | undefined
   },
 };
 
-/** default chains per CHAT_PROVIDER — cheap first, stronger fallbacks */
+/** default chains per CHAT_PROVIDER — reasoning first, budget fallbacks.
+ * avalai order set by the 2026-08-22 tool-arg probe: gpt-5.6-sol held exact
+ * schemas (5/6 + 1 safe refusal) where deepseek v4 variants mis-shaped
+ * required params (1/6) — see scripts/probe-reasoning-models.mjs. */
 function defaultChain(): string[] {
   switch (provider) {
     case "liara":
@@ -81,11 +84,9 @@ function defaultChain(): string[] {
       return ["openai", "avalai"];
     case "avalai":
     default:
-      // Budget-first: flash serves the load, pro/sol back it up, and Liara
-      // AI is the independent last resort (separate provider + credits).
-      return chatModel && chatModel !== "deepseek-v4-flash"
-        ? ["avalai", "liara"]
-        : ["avalai:deepseek-v4-flash", "avalai:deepseek-v4-pro", "avalai:gpt-5.6-sol", "liara"];
+      // Safety-first: sol serves the load (reasoning + exact tool args);
+      // deepseeks back it up for availability. CHAT_MODEL_CHAIN overrides.
+      return ["avalai:gpt-5.6-sol", "avalai:deepseek-v4-pro", "avalai:deepseek-v4-flash"];
   }
 }
 

@@ -1,0 +1,756 @@
+{
+  "paas": {
+    "getApps": {
+      "method": "GET",
+      "path": "/v1/projects"
+    },
+    "createApp": {
+      "method": "POST",
+      "path": "/v1/projects"
+    },
+    "getAppByName": {
+      "method": "GET",
+      "path": "/v1/projects/{name}"
+    },
+    "deleteAppByName": {
+      "method": "DELETE",
+      "path": "/v1/projects/{name}"
+    },
+    "turnApp": {
+      "method": "POST",
+      "path": "/v1/projects/{name}/actions/scale"
+    },
+    "restartApp": {
+      "method": "POST",
+      "path": "/v1/projects/{name}/actions/restart"
+    },
+    "sourcesDeploy": {
+      "method": "POST",
+      "path": "/v2/projects/{name}/sources"
+    },
+    "releasesDeploy": {
+      "method": "POST",
+      "path": "/v2/projects/{name}/releases"
+    },
+    "zeroDowntime": {
+      "method": "POST",
+      "path": "/v1/projects/{id}/zero-downtime/{status}"
+    },
+    "defaultSubdomain": {
+      "method": "POST",
+      "path": "/v1/projects/{id}/default-subdomain/{status}"
+    },
+    "ipStatic": {
+      "method": "POST",
+      "path": "/v1/projects/{id}/fixed-ip/{status}"
+    },
+    "readOnly": {
+      "method": "POST",
+      "path": "/v1/projects/{id}/read-only/{status}"
+    },
+    "updateEnvs": {
+      "method": "POST",
+      "path": "/v1/projects/update-envs"
+    },
+    "changePlan": {
+      "method": "POST",
+      "path": "/v1/projects/{name}/resize"
+    },
+    "createFtp": {
+      "method": "POST",
+      "path": "/v1/projects/{name}/disks/{dname}/ftp"
+    },
+    "getFtps": {
+      "method": "GET",
+      "path": "/v1/projects/{name}/disks/{dname}/ftp"
+    },
+    "getDisks": {
+      "method": "GET",
+      "path": "/v1/projects/{id}/disks"
+    },
+    "getBackups": {
+      "method": "GET",
+      "path": "/v1/projects/{id}/disks/{name}/backups"
+    },
+    "createBackup": {
+      "method": "POST",
+      "path": "/v1/projects/{id}/disks/{name}/backups"
+    },
+    "downloadBackup": {
+      "method": "POST",
+      "path": "/v1/projects/{id}/disks/{dname}/backups/{bname}/download"
+    },
+    "resizeDisk": {
+      "method": "POST",
+      "path": "/v1/projects/{name}/disks/{dname}/resize"
+    },
+    "createDisk": {
+      "method": "POST",
+      "path": "/v1/projects/{name}/disks"
+    },
+    "deleteDisk": {
+      "method": "DELETE",
+      "path": "/v1/projects/{id}/disks/{name}"
+    },
+    "deleteFtp": {
+      "method": "DELETE",
+      "path": "/v1/ftp/{fname}"
+    },
+    "checkDomain": {
+      "method": "GET",
+      "path": "/v1/domains/{id}/check"
+    },
+    "getAppLogs": {
+      "method": "GET",
+      "path": "/v1/projects/{name}/logs"
+    },
+    "getAppEvents": {
+      "method": "GET",
+      "path": "/v1/projects/{name}/events"
+    },
+    "getAppApplets": {
+      "method": "GET",
+      "path": "/v1/projects/{name}/applets"
+    },
+    "getAppReleases": {
+      "method": "GET",
+      "path": "/v1/projects/{name}/releases"
+    },
+    "getAppSummaryReports": {
+      "method": "GET",
+      "path": "/v1/projects/{name}/metrics/summary"
+    },
+    "getAppCpuReports": {
+      "method": "GET",
+      "path": "/v1/projects/{name}/metrics/cpu"
+    },
+    "getAppMemoryReports": {
+      "method": "GET",
+      "path": "/v1/projects/{name}/metrics/memory"
+    },
+    "getAppNetworkReceiveReports": {
+      "method": "GET",
+      "path": "/v1/projects/{name}/metrics/network-receive"
+    },
+    "getNetworkTransmitReports": {
+      "method": "GET",
+      "path": "/v1/projects/{name}/metrics/network-transmit"
+    },
+    "getAppDomains": {
+      "method": "GET",
+      "path": "/v1/domains"
+    },
+    "createAppDomain": {
+      "method": "POST",
+      "path": "/v1/domains"
+    },
+    "setAppDomain": {
+      "method": "POST",
+      "path": "/v1/domains/set-project"
+    },
+    "redirectDomain": {
+      "method": "POST",
+      "path": "/v1/domains/{id}/set-redirect"
+    },
+    "disableSsl": {
+      "method": "POST",
+      "path": "/v1/domains/{id}/ssl/disable"
+    },
+    "enableSsl": {
+      "method": "POST",
+      "path": "/v1/domains/provision-ssl-certs"
+    },
+    "deleteDomain": {
+      "method": "DELETE",
+      "path": "/v1/domains/{id}"
+    }
+  },
+  "dbaas": {
+    "getDatabase": {
+      "method": "GET",
+      "path": "/v1/databases/{id}"
+    },
+    "deleteDatabase": {
+      "method": "DELETE",
+      "path": "/v1/databases/{id}"
+    },
+    "getListDatabases": {
+      "method": "GET",
+      "path": "/v1/databases"
+    },
+    "createDatabase": {
+      "method": "POST",
+      "path": "/v1/databases"
+    },
+    "TurnDatabase": {
+      "method": "POST",
+      "path": "/v1/databases/{id}/actions/scale"
+    },
+    "resizeDatabase": {
+      "method": "POST",
+      "path": "/v1/databases/{id}/resize"
+    },
+    "getListBackups": {
+      "method": "GET",
+      "path": "/v1/databases/{id}/backups"
+    },
+    "createBackup": {
+      "method": "POST",
+      "path": "/v1/databases/{id}/backups"
+    },
+    "databasesSettings": {
+      "method": "PATCH",
+      "path": "/v1/databases/{id}/settings"
+    },
+    "downloadBackup": {
+      "method": "POST",
+      "path": "/v1/databases/{id}/backups/{name}/download"
+    },
+    "changeControlPanel": {
+      "method": "POST",
+      "path": "/v1/databases/{id}/control-panel/{status}"
+    },
+    "changePublicNetwork": {
+      "method": "PATCH",
+      "path": "/v1/databases/{id}/public-network/{status}"
+    },
+    "getDatabaseCpuReports": {
+      "method": "GET",
+      "path": "/v1/databases/{id}/metrics/cpu"
+    },
+    "getDatabaseMemoryReports": {
+      "method": "GET",
+      "path": "/v1/databases/{id}/metrics/memory"
+    },
+    "getDatabaseNetworkReceiveReports": {
+      "method": "GET",
+      "path": "/v1/databases/{id}/metrics/network-receive"
+    },
+    "getDatabaseNetworkTransmitReports": {
+      "method": "GET",
+      "path": "/v1/databases/{id}/metrics/network-transmit"
+    },
+    "getDatabaseSummaryReports": {
+      "method": "GET",
+      "path": "/v1/databases/{id}/metrics/summary"
+    },
+    "getDatabaseEvents": {
+      "method": "GET",
+      "path": "/v1/databases/{name}/events"
+    }
+  },
+  "dns": {
+    "getListZones": {
+      "method": "GET",
+      "path": "/api/v1/zones"
+    },
+    "createZone": {
+      "method": "POST",
+      "path": "/api/v1/zones"
+    },
+    "getZone": {
+      "method": "GET",
+      "path": "/api/v1/zones/{zone}"
+    },
+    "deleteZone": {
+      "method": "DELETE",
+      "path": "/api/v1/zones/{zone}"
+    },
+    "checkNameServer": {
+      "method": "PUT",
+      "path": "/api/v1/zones/{zone}/check"
+    },
+    "getListDnsRecords": {
+      "method": "GET",
+      "path": "/api/v1/zones/{zone}/dns-records"
+    },
+    "createDnsRecord": {
+      "method": "POST",
+      "path": "/api/v1/zones/{zone}/dns-records"
+    },
+    "getDnsRecord": {
+      "method": "GET",
+      "path": "/api/v1/zones/{zone}/dns-records/{id}"
+    },
+    "editDnsRecord": {
+      "method": "PUT",
+      "path": "/api/v1/zones/{zone}/dns-records/{id}"
+    },
+    "deleteDnsRecord": {
+      "method": "DELETE",
+      "path": "/api/v1/zones/{zone}/dns-records/{id}"
+    }
+  },
+  "storage": {
+    "getBuckets": {
+      "method": "GET",
+      "path": "/api/v1/buckets"
+    },
+    "createBucket": {
+      "method": "POST",
+      "path": "/api/v1/buckets"
+    },
+    "getMigrations": {
+      "method": "GET",
+      "path": "/api/v1/buckets/migrations"
+    },
+    "changeBucketAccess": {
+      "method": "PATCH",
+      "path": "/api/v1/buckets/{bucket}/type/{permission}"
+    },
+    "upgradeBucket": {
+      "method": "PATCH",
+      "path": "/api/v1/buckets/{bucket}/upgrade/{plan}"
+    },
+    "getSingleBuckets": {
+      "method": "GET",
+      "path": "/api/v1/buckets/{bucket}"
+    },
+    "destroyBucket": {
+      "method": "DELETE",
+      "path": "/api/v1/buckets/{bucket}"
+    },
+    "checkBucket": {
+      "method": "GET",
+      "path": "/api/v1/buckets/{bucket}/check-availability"
+    },
+    "migratingBuckets": {
+      "method": "POST",
+      "path": "/api/v1/buckets/migrates"
+    },
+    "getListPreviousBuckets": {
+      "method": "GET",
+      "path": "/api/v1/buckets/migration/from"
+    },
+    "getListKeys": {
+      "method": "GET",
+      "path": "/api/v1/keys"
+    },
+    "createKey": {
+      "method": "POST",
+      "path": "/api/v1/keys"
+    },
+    "getKey": {
+      "method": "GET",
+      "path": "/api/v1/keys/{key}"
+    },
+    "deleteKey": {
+      "method": "DELETE",
+      "path": "/api/v1/keys/{key}"
+    },
+    "updateKey": {
+      "method": "PATCH",
+      "path": "/api/v1/keys/{key}"
+    },
+    "revokeSecretKey": {
+      "method": "PATCH",
+      "path": "/api/v1/keys/{key}/revoke"
+    },
+    "downloadObject": {
+      "method": "GET",
+      "path": "/api/v1/buckets/{bucket}/download/${object}"
+    },
+    "uploadObject": {
+      "method": "GET",
+      "path": "/api/v1/buckets/{bucket}/upload/{object}"
+    },
+    "getListObjects": {
+      "method": "GET",
+      "path": "/api/v1/buckets/{bucket}/objects/{prefix}"
+    },
+    "deleteObject": {
+      "method": "DELETE",
+      "path": "/api/v1/buckets/{bucket}/objects/{prefix}"
+    },
+    "getStatObject": {
+      "method": "GET",
+      "path": "/api/v1/buckets/{bucket}/objects/statistics/{object}"
+    },
+    "createFolder": {
+      "method": "POST",
+      "path": "/api/v1/buckets/{bucket}/folders"
+    },
+    "deleteFolder": {
+      "method": "DELETE",
+      "path": "/api/v1/buckets/{bucket}/folders"
+    },
+    "getMetricsSummary": {
+      "method": "GET",
+      "path": "/api/v1/buckets/{bucket}/metrics/summary"
+    },
+    "getHisotricalMetrics": {
+      "method": "GET",
+      "path": "/api/v1/buckets/{bucket}/metrics/historical"
+    },
+    "getMetrics": {
+      "method": "GET",
+      "path": "/api/v1/buckets/{bucket}/metrics/{stat}"
+    }
+  },
+  "mail": {
+    "getMails": {
+      "method": "GET",
+      "path": "/api/v1/mails"
+    },
+    "postMails": {
+      "method": "POST",
+      "path": "/api/v1/mails"
+    },
+    "getSingleMailServer": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}"
+    },
+    "deleteMailServer": {
+      "method": "DELETE",
+      "path": "/api/v1/mails/{mailServerID}"
+    },
+    "editMailServer": {
+      "method": "PATCH",
+      "path": "/api/v1/mails/{mailServerID}"
+    },
+    "getCredential": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/smtp-credentials"
+    },
+    "generateCredentials": {
+      "method": "POST",
+      "path": "/api/v1/mails/{mailServerID}/smtp-credentials"
+    },
+    "revokeCredentials": {
+      "method": "PATCH",
+      "path": "/api/v1/mails/{mailServerID}/smtp-credentials"
+    },
+    "getCountMails": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/counts"
+    },
+    "checkMailServerDnsStatus": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/dns-check"
+    },
+    "checkDomainAvailable": {
+      "method": "GET",
+      "path": "/api/v1/mails/{domain}/check-availability"
+    },
+    "getAllMailAccounts": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/accounts"
+    },
+    "createMailACcount": {
+      "method": "POST",
+      "path": "/api/v1/mails/{mailServerID}/accounts"
+    },
+    "getAllInboundRules": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/inboundrules"
+    },
+    "addInboundRule": {
+      "method": "POST",
+      "path": "/api/v1/mails/{mailServerID}/inboundrules"
+    },
+    "deleteInboundRule": {
+      "method": "DELETE",
+      "path": "/api/v1/mail/{mailServerID}/inboundrules/{inboundruleID}"
+    },
+    "getAllMails": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/messages"
+    },
+    "sendMail": {
+      "method": "POST",
+      "path": "/api/v1/mails/{mailServerID}/messages"
+    },
+    "getSingleMail": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/messages/{messageID}"
+    },
+    "getListAddressForwarding": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/accounts/{accountID}/forwards"
+    },
+    "createAddressForwarding": {
+      "method": "POST",
+      "path": "/api/v1/mails/{mailServerID}/accounts/{accountID}/forwards"
+    },
+    "checkMailAvailable": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/accounts/{accountName}/check-availability"
+    },
+    "getSingleMailHtml": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/messages/{messageID}/render"
+    },
+    "getAllAttachments": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/messages/{messageID}/attachments"
+    },
+    "getAllEvents": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/messages/{messageID}/events"
+    },
+    "downloadAttachments": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/messages/{messageID}/attachments/{attachmentID}"
+    },
+    "generateTemporary": {
+      "method": "POST",
+      "path": "/api/v1/mails/{mailServerID}/messages/{messageID}/temporary-access"
+    },
+    "deleteMailAccount": {
+      "method": "DELETE",
+      "path": "/api/v1/mails/{mailServerID}/accounts/{accountID}"
+    },
+    "deleteSmtpCredential": {
+      "method": "DELETE",
+      "path": "/api/v1/mails/{mailServerID}/smtp-credentials/{username}"
+    },
+    "deleteExtraEndpoint": {
+      "method": "DELETE",
+      "path": "/api/v1/mails/{mailServerID}/accounts/{accountID}/forwards/{addressID}"
+    },
+    "trashMessage": {
+      "method": "PATCH",
+      "path": "/api/v1/mails/{mailServerID}/messages/{messageID}/"
+    },
+    "deleteMessage": {
+      "method": "DELETE",
+      "path": "/api/v1/mails/{mailServerID}/messages/{messageID}/"
+    },
+    "unfreeze": {
+      "method": "PATCH",
+      "path": "/api/v1/mails/{mailServerID}/unfreeze"
+    },
+    "getMetrics": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/metrics"
+    },
+    "createTag": {
+      "method": "POST",
+      "path": "/api/v1/mails/{mailServerID}/tags"
+    },
+    "getTags": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/tags"
+    },
+    "getTags_2": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/tags/stats"
+    },
+    "changePlan": {
+      "method": "POST",
+      "path": "/api/v1/mails/{mailServerID}/plan"
+    },
+    "getCurrentPlanHistory": {
+      "method": "GET",
+      "path": "/api/v1/mails/{mailServerID}/plan"
+    },
+    "deleteReservation": {
+      "method": "DELETE",
+      "path": "/api/v1/mails/{mailServerID}/plan"
+    }
+  },
+  "iaas": {
+    "getVMs": {
+      "method": "GET",
+      "path": "/vm"
+    },
+    "createVM": {
+      "method": "POST",
+      "path": "/vm"
+    },
+    "getVMDetails": {
+      "method": "GET",
+      "path": "/vm/{id}"
+    },
+    "deleteVM": {
+      "method": "DELETE",
+      "path": "/vm/{id}"
+    },
+    "unfreezeVM": {
+      "method": "POST",
+      "path": "/vm/unfreeze/{id}"
+    },
+    "getVMTrafficGraph": {
+      "method": "GET",
+      "path": "/vm/traffic-graph/{id}"
+    },
+    "getVMTrafficVolume": {
+      "method": "GET",
+      "path": "/vm/traffic-volume/{id}"
+    },
+    "setVMPower": {
+      "method": "PATCH",
+      "path": "/vm/power/{id}"
+    },
+    "createVMDisk": {
+      "method": "POST",
+      "path": "/vm/disk/{id}"
+    },
+    "getVMDiskDetails": {
+      "method": "GET",
+      "path": "/vm/disk/{id}"
+    },
+    "DeleteVMDisk": {
+      "method": "DELETE",
+      "path": "/vm/disk/{vmID}/{diskID}"
+    },
+    "extendVMDisk": {
+      "method": "POST",
+      "path": "/vm/disk/{vmID}/{diskID}"
+    },
+    "resetVMNetwork": {
+      "method": "POST",
+      "path": "/vm/reset-network/{id}"
+    },
+    "getVMOperations": {
+      "method": "GET",
+      "path": "/vm/operation/{id}"
+    },
+    "resetVMPassword": {
+      "method": "POST",
+      "path": "/vm/reset-password/{id}"
+    },
+    "resizeVM": {
+      "method": "PATCH",
+      "path": "/vm/resize/{id}"
+    },
+    "getPlans": {
+      "method": "GET",
+      "path": "/plans"
+    },
+    "getOperatingSystems": {
+      "method": "GET",
+      "path": "/oss"
+    }
+  },
+  "ai-account": {
+    "listWorkspaces": {
+      "method": "GET",
+      "path": "/v1/workspaces"
+    },
+    "createWorkspace": {
+      "method": "POST",
+      "path": "/v1/workspaces"
+    },
+    "checkWorkspaceAvailability": {
+      "method": "GET",
+      "path": "/v1/workspaces/{workspaceName}/check-availability"
+    },
+    "getWorkspace": {
+      "method": "GET",
+      "path": "/v1/workspaces/{workspaceID}"
+    },
+    "deleteWorkspace": {
+      "method": "DELETE",
+      "path": "/v1/workspaces/{workspaceID}"
+    },
+    "changeProviderPreferences": {
+      "method": "PATCH",
+      "path": "/v1/workspaces/{workspaceID}/change-provider-preferences"
+    },
+    "resizeWorkspace": {
+      "method": "POST",
+      "path": "/v1/workspaces/{workspaceID}/resize"
+    },
+    "unfreezeWorkspace": {
+      "method": "POST",
+      "path": "/v1/workspaces/{workspaceID}/unfreeze"
+    },
+    "getFreeTokens": {
+      "method": "GET",
+      "path": "/v1/workspaces/{workspaceID}/free-tokens"
+    },
+    "getModelLimits": {
+      "method": "GET",
+      "path": "/v1/workspaces/{workspaceID}/models/{modelID}/limits"
+    },
+    "getWorkspaceActivity": {
+      "method": "GET",
+      "path": "/v1/workspaces/{workspaceID}/activity"
+    },
+    "listKeys": {
+      "method": "GET",
+      "path": "/v1/keys"
+    },
+    "createKey": {
+      "method": "POST",
+      "path": "/v1/keys"
+    },
+    "updateKey": {
+      "method": "PUT",
+      "path": "/v1/keys/{keyID}"
+    },
+    "deleteKey": {
+      "method": "DELETE",
+      "path": "/v1/keys/{keyID}"
+    },
+    "listLogs": {
+      "method": "GET",
+      "path": "/v1/workspaces/{workspaceID}/logs"
+    },
+    "getLogDetailsApiKey": {
+      "method": "GET",
+      "path": "/v1/workspaces/{workspaceID}/logs/{logID}"
+    },
+    "getLogDetailsPlayground": {
+      "method": "GET",
+      "path": "/v1/workspaces/{workspaceID}/playground/logs/{logID}"
+    },
+    "playgroundChatCompletion": {
+      "method": "POST",
+      "path": "/api/v1/{workspaceID}/playground/chat/completions"
+    },
+    "playgroundImageGeneration": {
+      "method": "POST",
+      "path": "/api/v1/{workspaceID}/playground/images/generations"
+    },
+    "playgroundImageEdit": {
+      "method": "POST",
+      "path": "/api/v1/{workspaceID}/playground/images/edits"
+    },
+    "playgroundListModels": {
+      "method": "GET",
+      "path": "/api/v1/{workspaceID}/playground/models"
+    }
+  },
+  "ai-inference": {
+    "createChatCompletion": {
+      "method": "POST",
+      "path": "/api/{workspaceID}/v1/chat/completions"
+    },
+    "listInferenceModels": {
+      "method": "GET",
+      "path": "/api/{workspaceID}/v1/models"
+    },
+    "createEmbedding": {
+      "method": "POST",
+      "path": "/api/{workspaceID}/v1/embeddings"
+    },
+    "createSpeech": {
+      "method": "POST",
+      "path": "/api/{workspaceID}/v1/audio/speech"
+    },
+    "generateImage": {
+      "method": "POST",
+      "path": "/api/{workspaceID}/v1/images/generations"
+    },
+    "editImage": {
+      "method": "POST",
+      "path": "/api/{workspaceID}/v1/images/edits"
+    }
+  },
+  "ai-models": {
+    "listModels": {
+      "method": "GET",
+      "path": "/v1/models"
+    },
+    "getModel": {
+      "method": "GET",
+      "path": "/v1/models/{modelID}"
+    },
+    "listModelsFiltered": {
+      "method": "GET",
+      "path": "/v2/models"
+    }
+  }
+}
