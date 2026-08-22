@@ -35,14 +35,22 @@ interface VectorMeta {
   provider: string;
   model: string;
   dims: number;
+  encoding?: "f32" | "int8"; // int8 ships 4× smaller vectors (per-vector scale)
 }
 
 interface CorpusFile {
   meta: Record<string, unknown>;
   chunks: Chunk[];
-  vectors?: string[]; // base64 float32, parallel to chunks (added by embedding pass)
+  vectors?: string[]; // legacy inline base64 float32
   vectorMeta?: VectorMeta; // embedding pass provenance; mismatch disables the channel
 }
+
+interface VectorsFile {
+  vectorMeta: VectorMeta;
+  vectors: string[];
+  scales?: number[]; // int8: per-vector max-abs scale
+}
+
 const DATA_PATH = join(process.cwd(), "src", "data", "docs-chunks.json");
 // Vectors live beside the corpus so the chunk file the builder touches
 // stays small; loaded lazily by warm().
@@ -53,10 +61,22 @@ let bm25: BM25Index | null = null;
 let vectors: Float32Array[] | null = null;
 let warmed = false;
 
-function decodeVectors(b64s: string[]): Float32Array[] {
-  return b64s.map((b64) => {
-    const buf = Buffer.from(b64, "base64");
-    return new Float32Array(buf.buffer, buf.byteOffset, buf.length / 4);
+function decodeVectors(b64s: string[], scales?: number[]): Float32Array[] {
+  if (!scales) {
+    // f32 path: each base64 blob decodes straight to float32 samples
+    return b64s.map((b64) => {
+      const buf = Buffer.from(b64, "base64");
+      return new Float32Array(buf.buffer, buf.byteOffset, buf.length / 4);
+    });
+  }
+  // int8 path: dequantize (v / 127) × scale — cosine error stays well under
+  // rank-relevant thresholds at 768 dims.
+  return b64s.map((b64, i) => {
+    const bytes = Buffer.from(b64, "base64");
+    const out = new Float32Array(bytes.length);
+    const s = scales[i];
+    for (let j = 0; j < bytes.length; j++) out[j] = ((bytes[j] << 24) >> 24) * (s / 127); // signed byte
+    return out;
   });
 }
 
@@ -68,14 +88,18 @@ function warm(): void {
   const active = resolveEmbedProvider();
   const meta = corpus.vectorMeta;
   const metaOk = !!active && !!meta && meta.provider === active.provider && meta.model === active.model;
-  if (metaOk && Array.isArray(corpus.vectors) && corpus.vectors.length === chunks.length) {
-    vectors = decodeVectors(corpus.vectors);
-  } else if (metaOk) {
-    try {
-      const side = JSON.parse(readFileSync(VECTORS_PATH, "utf8")) as { vectors?: string[] };
-      if (Array.isArray(side.vectors) && side.vectors.length === chunks.length) vectors = decodeVectors(side.vectors);
-    } catch {
-      // no sidecar vector file — keyword-only
+  if (metaOk) {
+    if (Array.isArray(corpus.vectors) && corpus.vectors.length === chunks.length) {
+      vectors = decodeVectors(corpus.vectors);
+    } else {
+      try {
+        const side = JSON.parse(readFileSync(VECTORS_PATH, "utf8")) as VectorsFile;
+        if (Array.isArray(side.vectors) && side.vectors.length === chunks.length) {
+          vectors = side.vectorMeta.encoding === "int8" ? decodeVectors(side.vectors, side.scales) : decodeVectors(side.vectors);
+        }
+      } catch {
+        // no sidecar vector file — keyword-only
+      }
     }
   }
   warmed = true;
