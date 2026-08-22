@@ -20,6 +20,7 @@ export default defineOpenAPIConnection({
     "Liara PaaS: list and inspect apps, read logs, events, releases, and CPU/memory/summary metrics, update environment variables, redeploy from a release, and restart an app. Mutating calls (restart, env update, deploy) require user approval. Persian users call apps «برنامه».",
   auth: liaraConnectionAuth(),
   toolCall: { providedArguments: liaraTeamScopeArgs() },
+  approval: liaraApproval,
   operations: {
     allow: [
       "getApps",
