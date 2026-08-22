@@ -24,7 +24,7 @@ export function Mascot({ mood = "idle", size = 40, float = false, className = ""
   const avatar = (
     <span
       className={[
-        "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--bg)] ring-2 ring-[var(--accent)] transition",
+        "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--bg)] ring-1 ring-[var(--border)] transition",
         className,
       ].join(" ")}
       style={{ width: size, height: size }}
@@ -35,7 +35,7 @@ export function Mascot({ mood = "idle", size = 40, float = false, className = ""
         className="h-full w-full object-cover"
       />
       {mood === "thinking" && (
-        <span className="absolute inset-0 animate-pulse rounded-full bg-[var(--accent)]/20" aria-hidden />
+        <span className="absolute inset-0 animate-pulse rounded-full bg-[var(--accent)]/10" aria-hidden />
       )}
     </span>
   );
