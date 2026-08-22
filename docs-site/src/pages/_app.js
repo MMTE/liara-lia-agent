@@ -10,15 +10,18 @@ import { MDXProvider } from "@mdx-js/react";
 // it renders the ✦ bubble + the per-page ask pill beside it (unified in the
 // launcher, bottom-left) and the selection ask-bar (highlight text → ask
 // Lia about it). Gated on the build-time NEXT_PUBLIC_AGENT_ORIGIN so a
-// plain upstream build stays untouched.
+// plain upstream build stays untouched. `?v=` busts browser/edge caches of
+// embed.js — set NEXT_PUBLIC_EMBED_V (e.g. git short sha) at build time;
+// dev falls back to a per-build timestamp.
 const agentOrigin = process.env.NEXT_PUBLIC_AGENT_ORIGIN || "";
+const embedV = process.env.NEXT_PUBLIC_EMBED_V || String(Date.now()).slice(-8);
 
 export default function App({ Component, pageProps }) {
   return (
     <MDXProvider>
       <Component {...pageProps} />{" "}
       {agentOrigin && (
-        <script src={`${agentOrigin}/embed.js`} data-origin={agentOrigin} defer />
+        <script src={`${agentOrigin}/embed.js?v=${embedV}`} data-origin={agentOrigin} defer />
       )}
     </MDXProvider>
   );
