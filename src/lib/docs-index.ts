@@ -31,10 +31,17 @@ export interface DocHit {
 }
 
 
+interface VectorMeta {
+  provider: string;
+  model: string;
+  dims: number;
+}
+
 interface CorpusFile {
   meta: Record<string, unknown>;
   chunks: Chunk[];
   vectors?: string[]; // base64 float32, parallel to chunks (added by embedding pass)
+  vectorMeta?: VectorMeta; // embedding pass provenance; mismatch disables the channel
 }
 
 const DATA_PATH = join(process.cwd(), "src", "data", "docs-chunks.json");
@@ -49,7 +56,10 @@ function warm(): void {
   const corpus = JSON.parse(readFileSync(DATA_PATH, "utf8")) as CorpusFile;
   chunks = corpus.chunks;
   bm25 = new BM25Index(chunks.map((c) => ({ id: c.id, text: c.text })));
-  if (Array.isArray(corpus.vectors) && corpus.vectors.length === chunks.length) {
+  const active = resolveEmbedProvider();
+  const meta = corpus.vectorMeta;
+  const metaOk = !!active && !!meta && meta.provider === active.provider && meta.model === active.model;
+  if (metaOk && Array.isArray(corpus.vectors) && corpus.vectors.length === chunks.length) {
     vectors = corpus.vectors.map((b64) => {
       const buf = Buffer.from(b64, "base64");
       return new Float32Array(buf.buffer, buf.byteOffset, buf.length / 4);
@@ -75,18 +85,55 @@ function cosineTop(queryVec: Float32Array, k: number): { id: string; score: numb
   return scored.sort((a, b) => b.score - a.score).slice(0, k);
 }
 
-/** Optional semantic channel: embeds via Liara AI when key+workspace are set. */
-async function embedQuery(query: string): Promise<Float32Array | null> {
-  const key = process.env.LIARA_AI_API_KEY;
+/** Semantic-channel provider: Liara AI when configured, else the paid
+ *  avalai aggregator already serving chat. Vectors in the corpus file carry
+ *  vectorMeta so a model change disables the channel instead of corrupting
+ *  cosine scores across mismatched embedding spaces. */
+function resolveEmbedProvider(): {
+  provider: string;
+  model: string;
+  dims?: number;
+  url: (ws: string) => string;
+  key: string | undefined;
+} | null {
+  const liaraKey = process.env.LIARA_AI_API_KEY;
   const ws = process.env.LIARA_AI_WORKSPACE_ID;
-  if (!key || !ws) return null;
+  if (liaraKey && ws) {
+    return {
+      provider: "liara-ai",
+      model: process.env.LIARA_AI_EMBED_MODEL ?? "intfloat/multilingual-e5-large",
+      url: (workspace) => `https://ai.liara.ir/api/${workspace}/v1/embeddings`,
+      key: liaraKey,
+    };
+  }
+  if (process.env.AVALAI_API_KEY) {
+    return {
+      provider: "avalai",
+      model: process.env.AVALAI_EMBED_MODEL ?? "gemini-embedding-001",
+      dims: Number(process.env.AVALAI_EMBED_DIMS ?? 768) || 768,
+      url: () => "https://api.avalai.ir/v1/embeddings",
+      key: process.env.AVALAI_API_KEY,
+    };
+  }
+  return null;
+}
+
+/** e5-family models require query:/passage: task prefixes; others do not. */
+function e5Prefix(model: string, task: "query" | "passage"): string {
+  return model.includes("e5") ? `${task}: ` : "";
+}
+
+async function embedQuery(query: string): Promise<Float32Array | null> {
+  const p = resolveEmbedProvider();
+  if (!p) return null;
   try {
-    const res = await fetch(`https://ai.liara.ir/api/${ws}/v1/embeddings`, {
+    const res = await fetch(p.url(process.env.LIARA_AI_WORKSPACE_ID ?? ""), {
       method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${p.key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: process.env.LIARA_AI_EMBED_MODEL ?? "intfloat/multilingual-e5-large",
-        input: `query: ${query}`,
+        model: p.model,
+        ...(p.dims ? { dimensions: p.dims } : {}),
+        input: `${e5Prefix(p.model, "query")}${query}`,
       }),
     });
     if (!res.ok) return null;

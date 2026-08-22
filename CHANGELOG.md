@@ -31,6 +31,18 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
   reasoner 1/6 (mis-shaped required params, invented optionals). Default
   avalai chain is now `gpt-5.6-sol → deepseek-v4-pro → deepseek-v4-flash`
   (envs: `CHAT_MODEL_CHAIN`).
+- 2026-08-22 — **Semantic retrieval channel live.** Embedding pass
+  (`scripts/embed-docs-corpus.mjs`) vectors all 5,009 chunks;
+  `resolveEmbedProvider()` chains Liara AI → avalai
+  (gemini-embedding-001 @ 768 dims) so the channel runs on keys the
+  deployment already holds. Corpus carries `vectorMeta` (provider+model);
+  a mismatch disables cosine rather than corrupting scores across
+  embedding spaces. `/api/health` now reports `semantic:true`.
+### Fixed
+- 2026-08-22 — LiaPanel referenced `ToolTrace` without importing it —
+  production type-check (`next build`) failed; import restored.
+- 2026-08-22 — Stale ai-gateway 503 probe loop (glm-5.2 promo outage
+  watcher) killed; production had already failed over to avalai.
 - 2026-08-22 — Answers reference the exact docs section: the corpus now
   carries per-chunk `anchor`s (from `<Section id>` tags in the MDX, via a
   clean-mdx → `## title {#id}` → chunker pipeline), `search_docs`/`read_doc`

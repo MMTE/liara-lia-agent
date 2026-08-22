@@ -31,6 +31,11 @@ The presentation layer is the **real docs site**: a vendored fork of
 5. **Chrome extension**: load `extension/` unpacked on `chrome://extensions` —
    the same ✦ bubble on `*.liara.ir`, pointing at the deployed agent.
 
+
+**Repository**: <https://github.com/MMTE/liara-lia-agent> · **Agent app**:
+<https://liara-lia-agent.liara.run> · **Docs fork**:
+<https://liara-lia-docs.liara.run>
+
 ## What it does
 
 | Capability | How |
