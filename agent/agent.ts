@@ -1,7 +1,7 @@
 import { defineAgent } from "eve";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { LanguageModelV4 } from "@ai-sdk/provider";
-import { FallbackModel } from "./lib/model-chain";
+import { FallbackModel } from "./lib/model-chain.ts";
 
 // Provider routing (budget + resilience): an ordered fallback chain serves
 // every call; a provider that errors (auth, quota, network, 5xx) is benched
@@ -111,7 +111,7 @@ function resolveModel(): string | LanguageModelV4 {
     const modelOverride = sep === -1 ? undefined : entry.slice(sep + 1);
     const build = registry[name];
     if (!build) {
-      console.warn(`[model-chain] unknown provider "${name}" in chain — skipped`);
+      console.error(`[model-chain] unknown provider "${name}" in chain — skipped`);
       continue;
     }
     const model = build(modelOverride);
@@ -119,15 +119,22 @@ function resolveModel(): string | LanguageModelV4 {
       models.push(model);
       ids.push(entry);
     } else {
-      console.warn(`[model-chain] ${name} unavailable (missing keys) — skipped`);
+      console.error(`[model-chain] ${name} unavailable (missing keys) — skipped`);
     }
   }
   if (models.length === 0) {
-    throw new Error(
-      `No usable model in chain (CHAT_PROVIDER=${provider}). Set CHAT_MODEL_CHAIN or provider keys.`
-    );
+    // Boot-critical: the sidecar must start even without provider keys (the
+    // old single-model behavior) — build a keyless primary that fails
+    // per-turn instead of crashing at import time.
+    console.error("[model-chain] no provider keys present — booting keyless avalai model");
+    const keyless = createOpenAICompatible({
+      name: "avalai",
+      baseURL: env("AVALAI_BASE_URL") ?? "https://api.avalai.ir/v1",
+      apiKey: env("AVALAI_API_KEY"),
+    });
+    return keyless.chatModel(chatModel ?? "deepseek-v4-flash");
   }
-  console.log(`[model-chain] ${ids.join(" → ")}`);
+  console.error(`[model-chain] ${ids.join(" → ")}`);
   return models.length === 1
     ? models[0]!
     : new FallbackModel(models, { ids, log: (m) => console.log(m) });
