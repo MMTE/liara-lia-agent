@@ -43,13 +43,22 @@ interface CorpusFile {
   vectors?: string[]; // base64 float32, parallel to chunks (added by embedding pass)
   vectorMeta?: VectorMeta; // embedding pass provenance; mismatch disables the channel
 }
-
 const DATA_PATH = join(process.cwd(), "src", "data", "docs-chunks.json");
+// Vectors live beside the corpus so the chunk file the builder touches
+// stays small; loaded lazily by warm().
+const VECTORS_PATH = join(process.cwd(), "src", "data", "docs-vectors.json");
 
 let chunks: Chunk[] = [];
 let bm25: BM25Index | null = null;
 let vectors: Float32Array[] | null = null;
 let warmed = false;
+
+function decodeVectors(b64s: string[]): Float32Array[] {
+  return b64s.map((b64) => {
+    const buf = Buffer.from(b64, "base64");
+    return new Float32Array(buf.buffer, buf.byteOffset, buf.length / 4);
+  });
+}
 
 function warm(): void {
   if (warmed) return;
@@ -60,14 +69,17 @@ function warm(): void {
   const meta = corpus.vectorMeta;
   const metaOk = !!active && !!meta && meta.provider === active.provider && meta.model === active.model;
   if (metaOk && Array.isArray(corpus.vectors) && corpus.vectors.length === chunks.length) {
-    vectors = corpus.vectors.map((b64) => {
-      const buf = Buffer.from(b64, "base64");
-      return new Float32Array(buf.buffer, buf.byteOffset, buf.length / 4);
-    });
+    vectors = decodeVectors(corpus.vectors);
+  } else if (metaOk) {
+    try {
+      const side = JSON.parse(readFileSync(VECTORS_PATH, "utf8")) as { vectors?: string[] };
+      if (Array.isArray(side.vectors) && side.vectors.length === chunks.length) vectors = decodeVectors(side.vectors);
+    } catch {
+      // no sidecar vector file — keyword-only
+    }
   }
   warmed = true;
 }
-
 function cosineTop(queryVec: Float32Array, k: number): { id: string; score: number }[] {
   const scored: { id: string; score: number }[] = [];
   for (let i = 0; i < vectors!.length; i++) {

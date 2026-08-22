@@ -104,10 +104,9 @@ for (let b = 0; b < batches; b++) {
     console.log(`  embedded ${n}/${pending.length} (dim=${dim}, ${rate.toFixed(1)}/s)`);
   }
 }
-
-if (vectors.filter((v) => v === null).length > 0) throw new Error("chunks still without vectors");
-corpus.vectors = vectors;
-corpus.vectorMeta = { provider, model, dims: dim };
-writeFileSync(CORPUS, JSON.stringify(corpus));
+const out = { ...corpus, vectors: undefined };
+delete out.vectors;
+writeFileSync(CORPUS, JSON.stringify(out));
+writeFileSync(new URL("../src/data/docs-vectors.json", import.meta.url), JSON.stringify({ vectorMeta: { provider, model, dims: dim }, vectors }));
 existsSync(PROGRESS) && writeFileSync(PROGRESS, JSON.stringify({ done: pending.length, total: pending.length, dim }));
-console.log(`wrote ${vectors.length} vectors (${provider}/${model}, dim=${dim}) into docs-chunks.json`);
+console.log(`wrote ${vectors.length} vectors (${provider}/${model}, dim=${dim}) into docs-vectors.json (sidecar)`);
