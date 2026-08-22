@@ -8,12 +8,12 @@
   border-radius: 50%;
   border: none;
   cursor: pointer;
-  background: linear-gradient(135deg, #8b7cf6, #6d5ae0);
-  color: #fff;
+  background: linear-gradient(135deg, #00d4ff, #00a8cc);
+  color: #0c1214;
   font-size: 24px;
   line-height: 52px;
   text-align: center;
-  box-shadow: 0 4px 18px rgba(139, 124, 246, 0.45);
+  box-shadow: 0 4px 18px rgba(0, 212, 255, 0.35);
   transition: transform 0.15s ease;
 }
 #liara-agent-bubble:hover { transform: scale(1.08); }
@@ -32,7 +32,7 @@
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
   direction: rtl;
 }
-#liara-agent-panel iframe { width: 100%; height: 100%; border: 0; background: #0b0d14; }
+#liara-agent-panel iframe { width: 100%; height: 100%; border: 0; background: #121212; }
 #liara-agent-close {
   position: absolute;
   top: 8px;
