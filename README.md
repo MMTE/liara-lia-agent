@@ -40,7 +40,7 @@ The presentation layer is the **real docs site**: a vendored fork of
 
 | Capability | How |
 |---|---|
-| **Docs Q&A with citations** | Hybrid search (BM25 + vector RRF) over the full corpus — 4,260 chunks from 1,142 Persian guide pages (docs.liara.ir) + 201 API-reference pages (developers.liara.ir). Every answer cites its sources; citations deep-link into the docs fork when its origin is configured. |
+| **Docs Q&A with citations** | Hybrid search (BM25 + vector RRF) over the full corpus — 5,009 chunks from 1,142 Persian guide pages (docs.liara.ir) + 201 API-reference pages (developers.liara.ir). Every answer cites its sources; citations deep-link into the docs fork when its origin is configured. |
 | **Per-page ask button** | On every docs-fork page: «✦ پرسیدن از لیا درباره این صفحه» prefills the composer with a question about that page's title. |
 | **Incident diagnosis** | Connect your account → the agent inspects releases, logs, events and metrics via Liara's official API, correlates with docs, and reports root cause + evidence + fix. On `/console` an unhealthy deployment triggers a proactive nudge. |
 | **Connected console** | `/console` = your real Liara apps (BFF passthrough, read-only) + the Lia widget with surface context. |
@@ -90,8 +90,10 @@ docs-site (static, fork of liara-cloud/docs)     agent (this repo — Node app)
   Vercel AI Gateway / Blackbox (`CHAT_PROVIDER=vercel|blackbox`,
   `zai/glm-5.2`), Liara AI, OpenRouter — all switchable through env only
   (`CHAT_MODEL_CHAIN`).
-- **Embeddings** (optional semantic channel): Liara AI `multilingual-e5-large`;
-  BM25+RRF works standalone when unset.
+- **Embeddings** (semantic channel — **live in production**): provider chain
+  Liara AI `multilingual-e5-large` → Avalai `gemini-embedding-001` (768d,
+  int8-quantized vectors, `docs-vectors.json` sidecar); BM25+RRF works
+  standalone when unset. `/api/health` reports `corpus.semantic`.
 
 ## The docs fork (`docs-site/`)
 

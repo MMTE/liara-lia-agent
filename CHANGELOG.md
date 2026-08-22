@@ -38,6 +38,13 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
   deployment already holds. Corpus carries `vectorMeta` (provider+model);
   a mismatch disables cosine rather than corrupting scores across
   embedding spaces. `/api/health` now reports `semantic:true`.
+- 2026-08-22 — **Deployed**: release 6a89651f READY on Liara (12:36 local) —
+  semantic channel live in production (`/api/health` corpus.semantic:true),
+  full nine-service API surface + slash palette shipped; live smoke green
+  (docs-simple/multi/adversarial: settled+citations). Deploy notes: Liara's
+  shared builder intermittently 403s source fetches (retry) and times out
+  on full tsc+lint builds — `.liara-build` marker cheapens the remote build
+  (see next.config.mjs); quality gates stay local (tsc + 72 tests).
 ### Fixed
 - 2026-08-22 — LiaPanel referenced `ToolTrace` without importing it —
   production type-check (`next build`) failed; import restored.
