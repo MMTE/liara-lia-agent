@@ -359,7 +359,7 @@ export function LiaPanel({
               <button
                 type="button"
                 onClick={agent.cancel}
-                className="flex h-7 shrink-0 items-center gap-1 rounded-full border border-[var(--err)] px-2.5 text-[11.5px] text-[var(--err)] transition hover:bg-[var(--err)]/10"
+                className="mb-[5px] flex h-7 shrink-0 items-center gap-1 rounded-full border border-[var(--err)] px-2.5 text-[11.5px] text-[var(--err)] transition hover:bg-[var(--err)]/10"
               >
                 <Square className="h-3 w-3" />
                 توقف
@@ -369,7 +369,7 @@ export function LiaPanel({
                 type="submit"
                 disabled={draft.trim().length === 0}
                 aria-label="ارسال"
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-[#0c1214] transition disabled:opacity-30"
+                className="mb-[5px] flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-[#0c1214] transition disabled:opacity-30"
               >
                 <ArrowUp className="h-4 w-4" />
               </button>

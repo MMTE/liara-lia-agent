@@ -33,10 +33,16 @@ interface AnswerCardProps {
 export function AnswerCard({ text, citations, streaming = false }: AnswerCardProps) {
   return (
     <article className="md text-[13.5px] leading-7 text-[var(--text)]">
+      {streaming && (
+        <span className="mb-1 flex items-center gap-1 py-0.5" role="status" aria-label="لیا در حال نوشتن">
+          <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+          <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+          <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+        </span>
+      )}
       <Streamdown animated isAnimating={streaming}>
         {text || ""}
       </Streamdown>
-
       {citations.length > 0 && (
         <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 border-t border-[var(--border)]/60 pt-2 text-[11px] leading-5">
           <span className="flex shrink-0 items-center gap-1 text-[var(--text-dim)]/80">
