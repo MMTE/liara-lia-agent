@@ -2,13 +2,13 @@
 
 import { SCENARIOS } from "@/lib/scenarios";
 import { Mascot } from "./Mascot";
-import type { LiriResourceState } from "./types";
+import type { LiaResourceState } from "./types";
 
 interface HomeStateProps {
   scopeLabel: string;
   resource?: string;
   detail?: string;
-  state?: LiriResourceState;
+  state?: LiaResourceState;
   onAsk: (prompt: string) => void;
 }
 
@@ -18,7 +18,7 @@ export function HomeState({ scopeLabel, resource, detail, state, onAsk }: HomeSt
     <div className="px-4 pb-2 pt-6">
       <div className="flex flex-col items-center text-center">
         <Mascot size={64} float mood={state === "failed" ? "warning" : "idle"} />
-        <h2 className="mt-3 text-[15px] font-semibold text-[var(--text)]">سلام! من لیری هستم</h2>
+        <h2 className="mt-3 text-[15px] font-semibold text-[var(--text)]">سلام! من لیا هستم</h2>
         {contextLine && <p className="mt-1 max-w-[19rem] text-[12px] text-[var(--text-dim)]">{contextLine}</p>}
         <p className="mt-1 max-w-[19rem] text-[12.5px] leading-6 text-[var(--text-dim)]">
           می‌توانم مستندات لیارا را بخوانم، منابع شما را بررسی کنم و با تأیید شما تغییرشان بدهم.

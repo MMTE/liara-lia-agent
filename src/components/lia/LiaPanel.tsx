@@ -12,30 +12,30 @@ import { HomeState } from "./HomeState";
 import { Mascot } from "./Mascot";
 import { PlanCard } from "./PlanCard";
 import { ToolTrace } from "./ToolTrace";
-import type { LiriAgentHandle } from "./useLiriAgent";
-import type { LiriMessage, LiriResourceState, LiriSurface } from "./types";
+import type { LiaAgentHandle } from "./useLiaAgent";
+import type { LiaMessage, LiaResourceState, LiaSurface } from "./types";
 
-interface LiriPanelProps {
-  surface: LiriSurface;
+interface LiaPanelProps {
+  surface: LiaSurface;
   scopeLabel: string;
   resource?: string;
   detail?: string;
-  state?: LiriResourceState;
-  agent: LiriAgentHandle;
+  state?: LiaResourceState;
+  agent: LiaAgentHandle;
   /** standalone /chat mount: panel fills the viewport, no floating chrome, no close button */
   fullPage?: boolean;
   onClose?: () => void;
 }
 
-export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent, fullPage, onClose }: LiriPanelProps) {
+export function LiaPanel({ surface, scopeLabel, resource, detail, state, agent, fullPage, onClose }: LiaPanelProps) {
   const [view, setView] = useState<"chat" | "activity">("chat");
   const [draft, setDraft] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const [mode, setMode] = useState<"connected" | "demo" | "docs" | null>(null);
 
-  // Liri embed (docs-site): the host page prefills the composer via
-  // postMessage { type: "liri-prefill", text } — never auto-sends.
+  // Lia embed (docs-site): the host page prefills the composer via
+  // postMessage { type: "lia-prefill", text } — never auto-sends.
   // Origin allowlist: this app's own origin plus the docs fork when
   // NEXT_PUBLIC_DOCS_SITE_ORIGIN is configured. When that env is unset, only
   // non-production builds additionally accept the embedding host's origin
@@ -58,11 +58,11 @@ export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent,
     const onMessage = (e: MessageEvent) => {
       if (e.origin !== selfOrigin && e.origin !== trustedOrigin) return;
       const data = e.data as { type?: unknown; text?: unknown } | null;
-      if (!data || data.type !== "liri-prefill" || typeof data.text !== "string") return;
+      if (!data || data.type !== "lia-prefill" || typeof data.text !== "string") return;
       const text = data.text.trim();
       if (text) {
         setDraft(text);
-        (e.source as Window | null)?.postMessage({ type: "liri-prefill-ack" }, e.origin);
+        (e.source as Window | null)?.postMessage({ type: "lia-prefill-ack" }, e.origin);
       }
     };
     window.addEventListener("message", onMessage);
@@ -95,7 +95,7 @@ export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent,
     window.dispatchEvent(new CustomEvent("liara-mode", { detail: m }));
   };
 
-  const renderMessage = (m: LiriMessage, i: number) => {
+  const renderMessage = (m: LiaMessage, i: number) => {
     switch (m.kind) {
       case "user":
         return (
@@ -143,7 +143,7 @@ export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent,
   return (
     <div
       role={fullPage ? undefined : "dialog"}
-      aria-label="لیری، دستیار عملیاتی لیارا"
+      aria-label="لیا، دستیار عملیاتی لیارا"
       dir="rtl"
       className={
         fullPage
@@ -154,7 +154,7 @@ export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent,
       <header className="flex items-center gap-2.5 border-b border-[var(--border)] px-3 py-2.5">
         <Mascot mood={agent.mood} size={32} />
         <div className="min-w-0">
-          <p className="text-[13px] font-semibold leading-tight text-[var(--text)]">لیری</p>
+          <p className="text-[13px] font-semibold leading-tight text-[var(--text)]">لیا</p>
           <p className="text-[11px] leading-tight text-[var(--text-dim)]">
             {mode === "connected"
               ? "متصل به حساب شما"
@@ -269,8 +269,8 @@ export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent,
                   submit();
                 }
               }}
-              placeholder={agent.isBusy ? "لیری در حال کار است…" : "از لیری بپرسید…"}
-              aria-label="پیام به لیری"
+              placeholder={agent.isBusy ? "لیا در حال کار است…" : "از لیا بپرسید…"}
+              aria-label="پیام به لیا"
               className="max-h-[120px] min-h-[38px] flex-1 resize-none bg-transparent py-1.5 text-[13px] text-[var(--text)] outline-none placeholder:text-[var(--text-dim)]"
             />
             {agent.isBusy ? (
@@ -287,7 +287,7 @@ export function LiriPanel({ surface, scopeLabel, resource, detail, state, agent,
                 type="submit"
                 disabled={draft.trim().length === 0}
                 aria-label="ارسال"
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-[#0b0d14] transition disabled:opacity-30"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-[#0c1214] transition disabled:opacity-30"
               >
                 <ArrowUp className="h-4 w-4" />
               </button>

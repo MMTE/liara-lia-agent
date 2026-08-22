@@ -1,7 +1,7 @@
 "use client";
 
 import { FileText, PenLine, Search } from "lucide-react";
-import type { LiriMessage, ToolKind } from "./types";
+import type { LiaMessage, ToolKind } from "./types";
 
 const icons: Record<ToolKind, React.ComponentType<{ className?: string }>> = {
   read: Search,
@@ -15,17 +15,17 @@ const tone: Record<ToolKind, string> = {
   write: "text-[var(--warn)] bg-[var(--warn)]/10",
 };
 
-export function ActivityView({ messages }: { messages: LiriMessage[] }) {
+export function ActivityView({ messages }: { messages: LiaMessage[] }) {
   // flatten all trace steps, newest first
   const entries = messages
-    .filter((m): m is Extract<LiriMessage, { kind: "trace" }> => m.kind === "trace")
+    .filter((m): m is Extract<LiaMessage, { kind: "trace" }> => m.kind === "trace")
     .flatMap((m) => m.steps)
     .reverse();
 
   if (entries.length === 0) {
     return (
       <div className="px-4 py-10 text-center text-[12.5px] text-[var(--text-dim)]">
-        هنوز عملیاتی ثبت نشده است. هر خواندن، جست‌وجو یا تغییری که لیری انجام دهد اینجا ثبت می‌شود.
+        هنوز عملیاتی ثبت نشده است. هر خواندن، جست‌وجو یا تغییری که لیا انجام دهد اینجا ثبت می‌شود.
       </div>
     );
   }

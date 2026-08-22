@@ -3,15 +3,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Sparkles } from "lucide-react";
 import ConnectPanel from "@/components/ConnectPanel";
-import { LiriWidget } from "@/components/liri/LiriWidget";
-import type { LiriResourceState } from "@/components/liri/types";
+import { LiaWidget } from "@/components/lia/LiaWidget";
+import type { LiaResourceState } from "@/components/lia/types";
 import { AppDetail } from "./AppDetail";
 import { AppsList } from "./AppsList";
 import { sortedReleases, type AppDetailData, type LiaraProject, type LiaraReleases } from "./types";
 
 /**
  * Light console theme: re-scopes the app-wide dark CSS variables for this
- * subtree so the floating LiriWidget (a DOM descendant) renders light too.
+ * subtree so the floating LiaWidget (a DOM descendant) renders light too.
  */
 const LIGHT_THEME = {
   "--bg": "#f4f5f7",
@@ -21,8 +21,8 @@ const LIGHT_THEME = {
   "--border": "#e4e4e7",
   "--text": "#18181b",
   "--text-dim": "#71717a",
-  "--accent": "#7c3aed",
-  "--accent-soft": "#7c3aed1a",
+  "--accent": "#00d4ff",
+  "--accent-soft": "#00d4ff1f",
   "--ok": "#059669",
   "--warn": "#d97706",
   "--err": "#dc2626",
@@ -82,7 +82,7 @@ interface Selection {
 /**
  * /console host: session-aware shell around the Liara apps data. Not
  * connected → connect hero + labeled demo card; connected → real apps list
- * → detail. The LiriWidget gets a memoized proactive nudge when the open
+ * → detail. The LiaWidget gets a memoized proactive nudge when the open
  * app's latest release failed.
  */
 export function ConsoleHome() {
@@ -172,16 +172,16 @@ export function ConsoleHome() {
     [loadApps]
   );
 
-  // Widget-panel sync: connect/disconnect inside the Liri widget (its own
+  // Widget-panel sync: connect/disconnect inside the Lia widget (its own
   // ConnectPanel) dispatches "liara-mode" — mirror it here so the apps
   // list/phase follow without a reload.
   useEffect(() => {
-    const onLiriMode = (e: Event) => {
+    const onLiaMode = (e: Event) => {
       const mode = (e as CustomEvent<"connected" | "demo" | "docs">).detail;
       if (mode === "connected" || mode === "demo" || mode === "docs") onModeChange(mode);
     };
-    window.addEventListener("liara-mode", onLiriMode);
-    return () => window.removeEventListener("liara-mode", onLiriMode);
+    window.addEventListener("liara-mode", onLiaMode);
+    return () => window.removeEventListener("liara-mode", onLiaMode);
   }, [onModeChange]);
 
   // The open app — real selection in connected mode, the demo card otherwise.
@@ -192,7 +192,7 @@ export function ConsoleHome() {
     [selection, phase]
   );
   const latestFailed = sortedReleases(active?.releases)[0]?.state === "failed";
-  const widgetState: LiriResourceState = latestFailed ? "failed" : "ok";
+  const widgetState: LiaResourceState = latestFailed ? "failed" : "ok";
 
   // CRITICAL (Task 7 review): memoize on the underlying primitives so the
   // nudge object identity is stable and the widget's 4s timer isn't reset
@@ -200,7 +200,7 @@ export function ConsoleHome() {
   const nudge = useMemo(
     () =>
       active && latestFailed
-        ? { text: `لیری دید آخرین استقرار «${active.name}» ناموفق بوده. بررسی کنم؟`, cta: "بررسی کن" }
+        ? { text: `لیا دید آخرین استقرار «${active.name}» ناموفق بوده. بررسی کنم؟`, cta: "بررسی کن" }
         : undefined,
     [active, latestFailed]
   );
@@ -231,7 +231,7 @@ export function ConsoleHome() {
                 <div className="flex-1">
                   <h1 className="text-[19px] font-bold text-zinc-900">کنسول ابری‌ات را وصل کن</h1>
                   <p className="mt-1.5 max-w-xl text-[13px] leading-7 text-zinc-500">
-                    با وصل کردن توکن API لیارا، همین کنسول برنامه‌های واقعی‌ات را نشان می‌دهد؛ لیری هم کنارش می‌نشیند و
+                    با وصل کردن توکن API لیارا، همین کنسول برنامه‌های واقعی‌ات را نشان می‌دهد؛ لیا هم کنارش می‌نشیند و
                     مشکلات استقرار را قبل از تو می‌بیند.
                   </p>
                 </div>
@@ -295,7 +295,7 @@ export function ConsoleHome() {
         )}
       </main>
 
-      <LiriWidget
+      <LiaWidget
         surface="console"
         scopeLabel="کنسول لیارا"
         resource={active?.name}

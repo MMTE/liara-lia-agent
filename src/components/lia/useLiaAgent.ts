@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useEveAgent, type UseEveAgentStatus } from "eve/react";
-import { mapConversation } from "@/lib/liri-events";
+import { mapConversation } from "@/lib/lia-events";
 import { meterTurn, STORAGE_KEY } from "@/lib/turn-meter";
-import type { LiriMessage, LiriMood } from "./types";
+import type { LiaMessage, LiaMood } from "./types";
 
 interface SavedChat {
   events?: unknown[];
@@ -21,21 +21,22 @@ function loadSaved(): SavedChat {
   }
 }
 
-/** busy → thinking · pending plan → warning · finished verify trace → success · else idle */
-function deriveMood(messages: LiriMessage[], isBusy: boolean): LiriMood {
+/** stream error → error · busy → thinking · pending plan → warning · finished verify trace → success · else idle */
+function deriveMood(messages: LiaMessage[], isBusy: boolean, isError: boolean): LiaMood {
+  if (isError) return "error";
   if (isBusy) return "thinking";
   if (messages.some((m) => m.kind === "plan" && m.status === "pending")) return "warning";
-  const lastTrace = [...messages].reverse().find((m): m is Extract<LiriMessage, { kind: "trace" }> => m.kind === "trace");
+  const lastTrace = [...messages].reverse().find((m): m is Extract<LiaMessage, { kind: "trace" }> => m.kind === "trace");
   if (lastTrace && lastTrace.variant === "verify" && lastTrace.steps.every((s) => s.state === "done")) return "success";
   return "idle";
 }
 
-export interface LiriAgentHandle {
-  messages: LiriMessage[];
+export interface LiaAgentHandle {
+  messages: LiaMessage[];
   status: UseEveAgentStatus;
   isBusy: boolean;
   error: Error | undefined;
-  mood: LiriMood;
+  mood: LiaMood;
   ask: (text: string) => void;
   respond: (requestId: string, optionId: string) => void;
   cancel: () => void;
@@ -46,7 +47,7 @@ export interface LiriAgentHandle {
  * Thin adapter over `useEveAgent` mirroring Chat.tsx: persists the stream
  * snapshot under STORAGE_KEY on finish and meters each turn identically.
  */
-export function useLiriAgent(): LiriAgentHandle {
+export function useLiaAgent(): LiaAgentHandle {
   const [saved] = useState<SavedChat>(loadSaved);
   // hydration guard: localStorage-restored messages must not leak into SSR output
   const [mounted, setMounted] = useState(false);
@@ -67,10 +68,13 @@ export function useLiriAgent(): LiriAgentHandle {
 
   const isBusy = agent.status === "submitted" || agent.status === "streaming";
   const messages = useMemo(
-    () => mapConversation(agent.data.messages as never[]) as LiriMessage[],
+    () => mapConversation(agent.data.messages as never[]) as LiaMessage[],
     [agent.data.messages]
   );
-  const mood = useMemo(() => (mounted ? deriveMood(messages, isBusy) : "idle"), [mounted, messages, isBusy]);
+  const mood = useMemo(
+    () => (mounted ? deriveMood(messages, isBusy, agent.status === "error") : "idle"),
+    [mounted, messages, isBusy, agent.status]
+  );
 
   const ask = useCallback(
     (text: string) => {

@@ -5,6 +5,13 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
 ## [Unreleased]
 
 ### Added
+- 2026-08-22 — The agent is Lia (لیا) — ADR-0010: renamed from the prototype
+  name Liri/لیری across UI copy, embed API (`window.Lia`, `lia-prefill`),
+  the docs-fork ask pill (`AskLia.jsx`) and the extension guard; character
+  mascot with five 512px posture badges in `public/lia/` (idle / thinking /
+  alert / success / worried) mapped to the widget moods, including the new
+  `error` mood; agent UI adopts Liara's real palette (accent `#00d4ff`,
+  surfaces `#121212`/`#1e1e1e`, dark text on cyan buttons).
 - 2026-08-22 — Liri experience port shipped. Presentation layer moved to a
   vendored fork of liara-cloud/docs (`docs-site/`, ADR-0008): the real
   docs site loads `public/embed.js` from the agent origin — ✦ bubble +

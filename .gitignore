@@ -29,3 +29,6 @@ next-env.d.ts
 
 # eve local runtime state (mount .eve/.workflow-data on the host, never commit)
 .eve/
+
+# Lia character mascot raw assets (ADR-0010) — only 512px derivatives in public/lia/ ship
+lia-picture-assets/

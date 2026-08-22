@@ -1,5 +1,5 @@
-// src/lib/liri-events.js
-/** Maps eve stream messages to the Liri UI message union (prototype/src/types/agent.ts). */
+// src/lib/lia-events.js
+/** Maps eve stream messages to the Lia UI message union (prototype/src/types/agent.ts). */
 
 export const TOOL_META = {
   search_docs: { label: "جست‌وجو در مستندات لیارا", kind: "docs" },

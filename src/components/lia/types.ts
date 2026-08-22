@@ -1,4 +1,4 @@
-/** Types for the Liri message union produced by `mapConversation` (src/lib/liri-events.js). */
+/** Types for the Lia message union produced by `mapConversation` (src/lib/lia-events.js). */
 
 export type ToolKind = "docs" | "read" | "write";
 
@@ -15,7 +15,7 @@ export interface TraceStep {
   result: string;
 }
 
-export interface LiriCitation {
+export interface LiaCitation {
   title: string;
   url: string;
   /** docs.liara.ir path without origin (null for external urls) */
@@ -37,10 +37,10 @@ export interface PlanChange {
   detail: string;
 }
 
-export type LiriMessage =
+export type LiaMessage =
   | { id: string; kind: "user"; text: string }
   | { id: string; kind: "trace"; variant: "inspect" | "verify"; steps: TraceStep[] }
-  | { id: string; kind: "answer"; text: string; citations: LiriCitation[] }
+  | { id: string; kind: "answer"; text: string; citations: LiaCitation[] }
   | {
       id: string;
       kind: "clarify";
@@ -59,8 +59,8 @@ export type LiriMessage =
       status: "pending" | "approved" | "rejected";
     };
 
-export type LiriMood = "idle" | "thinking" | "warning" | "success";
+export type LiaMood = "idle" | "thinking" | "warning" | "success" | "error";
 
-export type LiriSurface = "docs" | "console";
+export type LiaSurface = "docs" | "console";
 
-export type LiriResourceState = "ok" | "failed";
+export type LiaResourceState = "ok" | "failed";

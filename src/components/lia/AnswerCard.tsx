@@ -4,18 +4,18 @@ import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import CodeBlock from "../CodeBlock";
-import type { LiriCitation } from "./types";
+import type { LiaCitation } from "./types";
 
 const DOCS_SITE_ORIGIN = (process.env.NEXT_PUBLIC_DOCS_SITE_ORIGIN || "").replace(/\/+$/, "");
 
 /** Keep docs.liara.ir citations inside the vendored docs fork when its origin is configured. */
-function citationHref(c: LiriCitation): string {
+function citationHref(c: LiaCitation): string {
   return DOCS_SITE_ORIGIN && c.route ? `${DOCS_SITE_ORIGIN}/${c.route}` : c.url;
 }
 
 interface AnswerCardProps {
   text: string;
-  citations: LiriCitation[];
+  citations: LiaCitation[];
   streaming?: boolean;
 }
 

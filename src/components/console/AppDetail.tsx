@@ -23,8 +23,8 @@ interface AppDetailProps {
 
 /**
  * Single-app view ported from prototype/src/pages/Dashboard.tsx: releases
- * timeline (failed → red badge + Liri banner), config summary and quick
- * actions that ask the page-level Liri widget.
+ * timeline (failed → red badge + Lia banner), config summary and quick
+ * actions that ask the page-level Lia widget.
  */
 export function AppDetail({ name, app, releases, buildLog, onAsk, onBack }: AppDetailProps) {
   const list = sortedReleases(releases);
@@ -68,7 +68,7 @@ export function AppDetail({ name, app, releases, buildLog, onAsk, onBack }: AppD
       {failed && (
         <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-4">
           <p className="flex-1 text-[12.5px] leading-6 text-red-700">
-            آخرین استقرار این برنامه ناموفق بوده است. لیری می‌تواند لاگ‌ها و ریلیزها را بررسی کند و ریشه مشکل را بگوید.
+            آخرین استقرار این برنامه ناموفق بوده است. لیا می‌تواند لاگ‌ها و ریلیزها را بررسی کند و ریشه مشکل را بگوید.
           </p>
           <button
             type="button"
@@ -77,7 +77,7 @@ export function AppDetail({ name, app, releases, buildLog, onAsk, onBack }: AppD
             }
             className="rounded-xl bg-red-600 px-4 py-1.5 text-[12px] font-medium text-white transition hover:bg-red-700"
           >
-            بررسی با لیری
+            بررسی با لیا
           </button>
         </div>
       )}
@@ -151,14 +151,14 @@ export function AppDetail({ name, app, releases, buildLog, onAsk, onBack }: AppD
           </section>
 
           <section className="rounded-2xl border border-zinc-200 bg-white p-4">
-            <h2 className="mb-3 text-[13.5px] font-semibold text-zinc-900">کارهای سریع با لیری</h2>
+            <h2 className="mb-3 text-[13.5px] font-semibold text-zinc-900">کارهای سریع با لیا</h2>
             <div className="space-y-2">
               {quickActions.map((action) => (
                 <button
                   key={action.label}
                   type="button"
                   onClick={() => onAsk(action.prompt)}
-                  className="w-full rounded-xl border border-zinc-200 py-1.5 text-[12px] text-zinc-700 transition hover:border-violet-300 hover:text-violet-700"
+                  className="w-full rounded-xl border border-zinc-200 py-1.5 text-[12px] text-zinc-700 transition hover:border-cyan-300 hover:text-cyan-700"
                 >
                   {action.label}
                 </button>

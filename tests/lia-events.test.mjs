@@ -1,7 +1,7 @@
-// tests/liri-events.test.mjs
+// tests/lia-events.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mapConversation, TOOL_META, summarizeOutput } from "../src/lib/liri-events.js";
+import { mapConversation, TOOL_META, summarizeOutput } from "../src/lib/lia-events.js";
 
 const userMsg = (text) => ({ id: "u1", role: "user", parts: [{ type: "text", text }] });
 const agentMsg = (parts) => ({ id: "a1", role: "assistant", parts });

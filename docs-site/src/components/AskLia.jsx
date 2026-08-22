@@ -1,9 +1,9 @@
 import React from "react";
 
-// Liri ask button (ADR-0008 patch): fixed RTL pill rendered by _app on every
-// docs page. Opens the embedded Liri panel (embed.js) with a per-page prompt.
+// Lia ask button (ADR-0008 patch): fixed RTL pill rendered by _app on every
+// docs page. Opens the embedded Lia panel (embed.js) with a per-page prompt.
 // Renders nothing unless NEXT_PUBLIC_AGENT_ORIGIN was set at build time.
-export default function AskLiri() {
+export default function AskLia() {
   if (!process.env.NEXT_PUBLIC_AGENT_ORIGIN) return null;
 
   const ask = () => {
@@ -14,8 +14,8 @@ export default function AskLiri() {
         .replace(/\s*[-|–]\s*لیارا.*$/, "")
         .replace(/^مستندات\s+/, "")
         .trim() || raw.trim() || "این صفحه";
-    if (window.Liri) {
-      window.Liri.open(
+    if (window.Lia) {
+      window.Lia.open(
         `درباره «${topic}» توضیح بده — نکات مهم و خطاهای رایج را بگو`
       );
     }
@@ -26,12 +26,12 @@ export default function AskLiri() {
       type="button"
       dir="rtl"
       onClick={ask}
-      title="پرسیدن از لیری درباره این صفحه"
-      className="fixed bottom-5 right-5 z-[60] rounded-full bg-[#6d5df0] px-4 py-2.5 text-sm font-bold text-white shadow-lg transition-colors hover:bg-[#5a4bd8]"
+      title="پرسیدن از لیا درباره این صفحه"
+      className="fixed bottom-5 right-5 z-[60] rounded-full bg-[#00d4ff] px-4 py-2.5 text-sm font-bold text-[#0c1214] shadow-lg transition-colors hover:bg-[#00b8dd]"
     >
       ✦{" "}
-      <span className="hidden sm:inline">پرسیدن از لیری درباره این صفحه</span>
-      <span className="sm:hidden">لیری</span>
+      <span className="hidden sm:inline">پرسیدن از لیا درباره این صفحه</span>
+      <span className="sm:hidden">لیا</span>
     </button>
   );
 }

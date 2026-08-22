@@ -5,7 +5,7 @@
  * (input/output/cache-read tokens, tool names, error flag) to `/api/stats`;
  * best-effort only — failures are swallowed. `STORAGE_KEY` is the
  * localStorage slot where Chat persists `{events, session}` across reloads.
- * Used by Chat and the Liri embed widget so both meter identically.
+ * Used by Chat and the Lia embed widget so both meter identically.
  */
 
 /** localStorage slot for the persisted chat snapshot. */

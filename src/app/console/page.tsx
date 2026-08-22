@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 // Server shell around the client host: ConsoleHome owns the session phase
-// (demo hero vs. connected apps list → detail) and the page-level LiriWidget.
+// (demo hero vs. connected apps list → detail) and the page-level LiaWidget.
 export default function ConsolePage() {
   return <ConsoleHome />;
 }

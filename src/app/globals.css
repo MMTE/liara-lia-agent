@@ -2,15 +2,16 @@
 @import "highlight.js/styles/github-dark.css";
 
 :root {
-  --bg: #0b0d14;
-  --bg-raised: #12151f;
-  --bg-bubble-user: #1d2333;
-  --bg-bubble-agent: #12151f;
-  --border: #232939;
-  --text: #e7eaf2;
-  --text-dim: #98a1b5;
-  --accent: #8b7cf6;
-  --accent-soft: #8b7cf61f;
+  /* Liara palette (ADR-0010 §4): dashboard cyan accent + neutral surfaces */
+  --bg: #121212;
+  --bg-raised: #1e1e1e;
+  --bg-bubble-user: #2a2a2a;
+  --bg-bubble-agent: #1e1e1e;
+  --border: #2e2e2e;
+  --text: #eeeeee;
+  --text-dim: #b1b6be;
+  --accent: #00d4ff;
+  --accent-soft: #00d4ff1f;
   --ok: #4ade80;
   --warn: #fbbf24;
   --err: #f87171;
@@ -38,7 +39,7 @@ code, pre, kbd {
 }
 
 pre {
-  background: #0d1017 !important;
+  background: #1a1a1a !important;
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 14px 16px;
@@ -47,7 +48,7 @@ pre {
 }
 
 :not(pre) > code {
-  background: #1a1f2e;
+  background: #262626;
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 1px 6px;
@@ -64,13 +65,13 @@ pre {
 .md a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 .md table { border-collapse: collapse; margin: 0.6em 0; font-size: 0.92em; display: block; overflow-x: auto; }
 .md :is(th, td) { border: 1px solid var(--border); padding: 5px 10px; text-align: start; }
-.md th { background: #1a1f2e; }
+.md th { background: #262626; }
 .md blockquote { border-inline-start: 3px solid var(--accent); padding-inline-start: 12px; color: var(--text-dim); margin: 0.6em 0; }
 .md hr { border-color: var(--border); margin: 1em 0; }
 
 /* thin scrollbars */
 *::-webkit-scrollbar { width: 8px; height: 8px; }
-*::-webkit-scrollbar-thumb { background: #2a3145; border-radius: 4px; }
+*::-webkit-scrollbar-thumb { background: #383838; border-radius: 4px; }
 *::-webkit-scrollbar-track { background: transparent; }
 
 @keyframes pulse-dot {

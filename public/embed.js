@@ -1,6 +1,6 @@
-// Liri embed (ADR-0008) — script loaded by docs-site on every page.
+// Lia embed (ADR-0008) — script loaded by docs-site on every page.
 // Renders the ✦ bubble + chat panel (agent-origin iframe) and exposes
-// window.Liri = { open(prefill?), close() } for the host page to trigger
+// window.Lia = { open(prefill?), close() } for the host page to trigger
 // the assistant. Vanilla JS + inline styles only; no build step.
 //
 // Origin resolution: <script src="<origin>/embed.js" data-origin="<origin>">
@@ -9,7 +9,7 @@
   "use strict";
 
   if (window.top !== window) return; // top frame only
-  if (window.Liri && window.Liri._embed) return; // idempotent
+  if (window.Lia && window.Lia._embed) return; // idempotent
 
   var current = document.currentScript;
   var origin = current && current.dataset ? current.dataset.origin : "";
@@ -27,13 +27,13 @@
 
   // --- bubble (bottom-left) ------------------------------------------------
   var bubble = document.createElement("button");
-  bubble.id = "liri-bubble";
+  bubble.id = "lia-bubble";
   bubble.type = "button";
-  bubble.title = "پرسیدن از لیری";
-  bubble.setAttribute("aria-label", "پرسیدن از لیری");
+  bubble.title = "پرسیدن از لیا";
+  bubble.setAttribute("aria-label", "پرسیدن از لیا");
   bubble.setAttribute("aria-haspopup", "dialog");
   var mascot = document.createElement("img");
-  mascot.src = origin + "/liri.jpg";
+  mascot.src = origin + "/lia/idle.png";
   mascot.alt = "";
   css(mascot, { width: "100%", height: "100%", objectFit: "cover", display: "block" });
   bubble.appendChild(mascot);
@@ -44,14 +44,14 @@
     width: "52px",
     height: "52px",
     borderRadius: "50%",
-    border: "2px solid rgba(255,255,255,.15)",
-    background: "#0b0d14",
+    border: "2px solid #00d4ff",
+    background: "#121212",
     padding: "0",
     margin: "0",
     cursor: "pointer",
     overflow: "hidden",
     display: "block",
-    boxShadow: "0 8px 24px rgba(11,13,20,.35)",
+    boxShadow: "0 8px 24px rgba(0,0,0,.35)",
     zIndex: String(Z_BUBBLE),
   });
 
@@ -95,7 +95,7 @@
   function deliverPrefill() {
     if (!pendingPrefill || !iframeLoaded || !iframe || !iframe.contentWindow) return;
     try {
-      iframe.contentWindow.postMessage({ type: "liri-prefill", text: pendingPrefill }, origin);
+      iframe.contentWindow.postMessage({ type: "lia-prefill", text: pendingPrefill }, origin);
     } catch (err) {
       /* cross-origin hiccup — non-fatal, user can still type */
     }
@@ -119,7 +119,7 @@
 
   window.addEventListener("message", function (e) {
     if (!iframe || e.source !== iframe.contentWindow) return;
-    if (e.data && e.data.type === "liri-prefill-ack") {
+    if (e.data && e.data.type === "lia-prefill-ack") {
       pendingPrefill = null;
       stopDelivery();
     }
@@ -133,39 +133,39 @@
     }
 
     backdrop = document.createElement("div");
-    backdrop.id = "liri-backdrop";
+    backdrop.id = "lia-backdrop";
     css(backdrop, {
       position: "fixed",
       top: "0",
       left: "0",
       right: "0",
       bottom: "0",
-      background: "rgba(11,13,20,.35)",
+      background: "rgba(0,0,0,.35)",
       zIndex: String(Z_BACKDROP),
     });
     backdrop.addEventListener("click", close);
 
     panel = document.createElement("div");
-    panel.id = "liri-panel";
+    panel.id = "lia-panel";
     panel.dir = "rtl";
     panel.setAttribute("role", "dialog");
-    panel.setAttribute("aria-label", "گفتگو با لیری");
+    panel.setAttribute("aria-label", "گفتگو با لیا");
     css(panel, {
       position: "fixed",
       left: "20px",
       bottom: "88px",
       width: "min(420px, calc(100vw - 24px))",
       height: "min(660px, 78vh)",
-      background: "#0b0d14",
+      background: "#1e1e1e",
       borderRadius: "16px",
       overflow: "hidden",
-      boxShadow: "0 24px 64px rgba(11,13,20,.45)",
+      boxShadow: "0 24px 64px rgba(0,0,0,.45)",
       zIndex: String(Z_PANEL),
     });
 
     iframe = document.createElement("iframe");
     iframe.src = origin + "/chat?embed=1";
-    iframe.title = "گفتگو با لیری";
+    iframe.title = "گفتگو با لیا";
     css(iframe, { width: "100%", height: "100%", border: "none", display: "block" });
     iframe.addEventListener("load", function () {
       iframeLoaded = true;
@@ -175,7 +175,7 @@
 
     var closeBtn = document.createElement("button");
     closeBtn.type = "button";
-    closeBtn.id = "liri-close";
+    closeBtn.id = "lia-close";
     closeBtn.textContent = "✕";
     closeBtn.setAttribute("aria-label", "بستن");
     css(closeBtn, {
@@ -186,7 +186,7 @@
       height: "28px",
       borderRadius: "50%",
       border: "none",
-      background: "rgba(11,13,20,.55)",
+      background: "rgba(0,0,0,.55)",
       color: "#fff",
       fontSize: "13px",
       lineHeight: "28px",
@@ -207,7 +207,7 @@
     else open();
   });
 
-  window.Liri = { _embed: true, open: open, close: close };
+  window.Lia = { _embed: true, open: open, close: close };
 
   function mount() {
     document.body.appendChild(bubble);

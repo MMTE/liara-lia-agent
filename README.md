@@ -8,22 +8,22 @@ Not a docs chatbot — an **AI cloud operator** grounded in Liara's documentatio
 APIs with human-in-the-loop approvals for every mutation.
 
 The presentation layer is the **real docs site**: a vendored fork of
-[liara-cloud/docs](https://github.com/liara-cloud/docs) with Liri woven in
+[liara-cloud/docs](https://github.com/liara-cloud/docs) with Lia woven in
 (ADR-0008). This repo's Next.js app is the agent service behind it.
 
 ## Where to try it (judge guide)
 
 1. **Primary — the docs fork deployment**: browse the deployed docs site
-   (real docs.liara.ir experience). Every page carries the ✦ Liri bubble and a
-   per-page ask button «✦ پرسیدن از لیری درباره این صفحه» that opens the
+   (real docs.liara.ir experience). Every page carries the ✦ Lia bubble and a
+   per-page ask button «✦ پرسیدن از لیا درباره این صفحه» that opens the
    assistant with a question about that exact page prefilled (never auto-sent).
-2. **Agent app — `/chat`**: the full-page Liri widget (same brain, standalone).
+2. **Agent app — `/chat`**: the full-page Lia widget (same brain, standalone).
    Ask any Liara question in Persian or English.
 3. **Connect your account**: on `/console` (or via the widget's connect panel)
    paste an API token from your Liara panel (Settings → API tokens). The token
    is validated against `GET /v1/projects`, stored in server memory only, and
    never logged. `/console` then shows your real apps; if a deployment looks
-   unhealthy, Liri proactively nudges with a diagnosis offer.
+   unhealthy, Lia proactively nudges with a diagnosis offer.
 4. Run the **one-click scenario chips** above the composer — six prompts
    covering simple docs, multi-hop, incident, ambiguous→clarify, follow-up
    context, and config generation (the full library adds next-steps and
@@ -36,9 +36,9 @@ The presentation layer is the **real docs site**: a vendored fork of
 | Capability | How |
 |---|---|
 | **Docs Q&A with citations** | Hybrid search (BM25 + vector RRF) over the full corpus — 4,260 chunks from 1,142 Persian guide pages (docs.liara.ir) + 201 API-reference pages (developers.liara.ir). Every answer cites its sources; citations deep-link into the docs fork when its origin is configured. |
-| **Per-page ask button** | On every docs-fork page: «✦ پرسیدن از لیری درباره این صفحه» prefills the composer with a question about that page's title. |
+| **Per-page ask button** | On every docs-fork page: «✦ پرسیدن از لیا درباره این صفحه» prefills the composer with a question about that page's title. |
 | **Incident diagnosis** | Connect your account → the agent inspects releases, logs, events and metrics via Liara's official API, correlates with docs, and reports root cause + evidence + fix. On `/console` an unhealthy deployment triggers a proactive nudge. |
-| **Connected console** | `/console` = your real Liara apps (BFF passthrough, read-only) + the Liri widget with surface context. |
+| **Connected console** | `/console` = your real Liara apps (BFF passthrough, read-only) + the Lia widget with surface context. |
 | **Guided fixes with approval** | Mutations (restart / env change / redeploy) pause for your explicit approval — Eve's durable HITL. Destructive operations are not exposed at all. |
 | **Clarifying questions** | Ambiguous requests trigger native `ask_question` prompts with option buttons. |
 | **Context memory** | Durable sessions survive restarts; follow-ups like «لاگ‌هاش رو نشون بده» resolve against the pinned app. |
@@ -55,7 +55,7 @@ docs-site (static, fork of liara-cloud/docs)     agent (this repo — Node app)
 │ real docs.liara.ir pages + PATCHES   │ embed.js│ Next.js 16 + Eve agent        │
 │ _app.js loads  <agent>/embed.js      │◄────────┤ /eve/v1/session (SSE stream)  │
 │ ✦ bubble → iframe /chat?embed=1      │ iframe  │ /api/health · /stats · connect│
-│ AskLiri pill → window.Liri.open(...) │────────►│ /api/liara/apps (BFF, 401 gate)│
+│ AskLia pill → window.Lia.open(...) │────────►│ /api/liara/apps (BFF, 401 gate)│
 └──────────────────────────────────────┘         │ /chat (widget) · /console     │
                                                  │ / → 307 /chat (query kept)    │
                                                  └───────────────────────────────┘
@@ -68,8 +68,8 @@ docs-site (static, fork of liara-cloud/docs)     agent (this repo — Node app)
   OpenAPI specs (operation allow-list, approval policy on the three write ops);
   skills for troubleshooting, deployment, docs-research.
 - **Embed contract**: `public/embed.js` (agent origin) renders the bubble +
-  panel iframe and exposes `window.Liri = { open(prefill), close() }`. The
-  panel accepts `postMessage {type:"liri-prefill"}` from the app's own origin
+  panel iframe and exposes `window.Lia = { open(prefill), close() }`. The
+  panel accepts `postMessage {type:"lia-prefill"}` from the app's own origin
   and the configured docs origin (in local dev without the env, additionally
   the embedding referrer's origin — non-production only). `?embed=1` switches
   the widget's scope label to «دستیار مستندات لیارا».
@@ -132,7 +132,7 @@ local agent).
 2. **Docs-site app** (static): `cd docs-site && yarn && yarn build`, deploy
    `out/` as a static Liara app with
    `NEXT_PUBLIC_AGENT_ORIGIN=https://<agent-app>.liara.ir` set at build time —
-   it wires `embed.js` and the AskLiri pill to the agent.
+   it wires `embed.js` and the AskLia pill to the agent.
 
 The two origins must point at each other
 (`NEXT_PUBLIC_AGENT_ORIGIN` ↔ `NEXT_PUBLIC_DOCS_SITE_ORIGIN`).

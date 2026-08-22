@@ -3,40 +3,40 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import { LiriPanel } from "./LiriPanel";
+import { LiaPanel } from "./LiaPanel";
 import { Mascot } from "./Mascot";
-import { useLiriAgent } from "./useLiriAgent";
-import type { LiriResourceState, LiriSurface } from "./types";
+import { useLiaAgent } from "./useLiaAgent";
+import type { LiaResourceState, LiaSurface } from "./types";
 
-export interface LiriRequest {
+export interface LiaRequest {
   text: string;
   /** increment to trigger a new request from outside the widget */
   nonce: number;
 }
 
-export interface LiriNudge {
+export interface LiaNudge {
   text: string;
   cta: string;
 }
 
-interface LiriWidgetProps {
-  surface: LiriSurface;
+interface LiaWidgetProps {
+  surface: LiaSurface;
   scopeLabel: string;
   resource?: string;
   detail?: string;
-  state?: LiriResourceState;
-  request?: LiriRequest;
-  nudge?: LiriNudge;
+  state?: LiaResourceState;
+  request?: LiaRequest;
+  nudge?: LiaNudge;
   /** standalone /chat mount: render the panel inline filling the viewport, no floating bubble */
   fullPage?: boolean;
 }
 
 /**
- * Floating Liri launcher: collapsed bubble (bottom-left, physical `left` for
+ * Floating Lia launcher: collapsed bubble (bottom-left, physical `left` for
  * RTL), proactive nudge after 4s, and a nonce-triggered ask from the host page.
  */
-export function LiriWidget({ surface, scopeLabel, resource, detail, state, request, nudge, fullPage }: LiriWidgetProps) {
-  const agent = useLiriAgent();
+export function LiaWidget({ surface, scopeLabel, resource, detail, state, request, nudge, fullPage }: LiaWidgetProps) {
+  const agent = useLiaAgent();
   const [open, setOpen] = useState(false);
   const [showNudge, setShowNudge] = useState(false);
   const handledNonce = useRef(request?.nonce ?? 0);
@@ -63,7 +63,7 @@ export function LiriWidget({ surface, scopeLabel, resource, detail, state, reque
   if (fullPage) {
     return (
       <div className="flex h-[100dvh] w-full justify-center">
-        <LiriPanel
+        <LiaPanel
           fullPage
           surface={surface}
           scopeLabel={scopeLabel}
@@ -88,7 +88,7 @@ export function LiriWidget({ surface, scopeLabel, resource, detail, state, reque
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
             className="pointer-events-auto origin-bottom-left"
           >
-            <LiriPanel
+            <LiaPanel
               surface={surface}
               scopeLabel={scopeLabel}
               resource={resource}
@@ -129,7 +129,7 @@ export function LiriWidget({ surface, scopeLabel, resource, detail, state, reque
                 setShowNudge(false);
                 setOpen(true);
               }}
-              className="mt-2.5 w-full rounded-xl bg-[var(--accent)] py-1.5 text-[12.5px] font-medium text-[#0b0d14] transition hover:opacity-90"
+              className="mt-2.5 w-full rounded-xl bg-[var(--accent)] py-1.5 text-[12.5px] font-medium text-[#0c1214] transition hover:opacity-90"
             >
               {nudge.cta}
             </button>
@@ -140,12 +140,12 @@ export function LiriWidget({ surface, scopeLabel, resource, detail, state, reque
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "بستن لیری" : "گفت‌وگو با لیری"}
+        aria-label={open ? "بستن لیا" : "گفت‌وگو با لیا"}
         aria-expanded={open}
         className="pointer-events-auto group flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-raised)] py-1.5 pe-3 ps-1.5 text-[var(--text)] shadow-xl shadow-black/30 transition hover:border-[var(--accent)]"
       >
         <Mascot mood={agent.mood} size={34} float={!open} />
-        <span className="text-[12.5px] group-hover:text-[var(--accent)]">{open ? "بستن" : "لیری"}</span>
+        <span className="text-[12.5px] group-hover:text-[var(--accent)]">{open ? "بستن" : "لیا"}</span>
         {!open && state === "failed" && <span className="h-1.5 w-1.5 rounded-full bg-[var(--warn)]" aria-hidden />}
       </button>
     </div>
