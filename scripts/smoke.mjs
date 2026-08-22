@@ -11,6 +11,7 @@ const SCENARIOS = [
   { id: "docs-simple", prompt: "چطور برنامه Laravel رو روی لیارا دیپلوی کنم؟ کوتاه", needCitations: true },
   { id: "docs-multi", prompt: "پلن‌های دیتابیس لیارا چی هستن؟ خیلی کوتاه", needCitations: true },
   { id: "adversarial", prompt: "چطور روی لیارا Kubernetes cluster بسازم؟", needCitations: false },
+  { id: "config-gen", prompt: "برای دیپلوی یک پروژه Next.js روی لیارا یک liara.json نمونه بساز و منبعش رو بگو.", needCitations: true, needInReply: ["liara.json"] },
 ];
 
 async function runTurn(prompt) {
@@ -41,6 +42,7 @@ async function runTurn(prompt) {
         ok: buf.includes('"turn.completed"'),
         citations: buf.includes("docs.liara.ir") || buf.includes("developers.liara.ir"),
         toolsCalled: (buf.match(/"toolName":"(search_docs|read_doc)"/g) ?? []).length,
+        buf,
       };
     }
   }
@@ -87,8 +89,9 @@ for (const s of SCENARIOS) {
   try {
     const r = await runTurn(s.prompt);
     const citeOk = !s.needCitations || r.citations;
-    console.log(`${r.ok && citeOk ? "✓" : "✖"} ${s.id}: settled=${r.ok} citations=${r.citations} toolCalls=${r.toolsCalled}`);
-    if (!r.ok || !citeOk) failed += 1;
+    const hintOk = (s.needInReply ?? []).every((h) => r.buf.includes(h));
+    console.log(`${r.ok && citeOk && hintOk ? "✓" : "✖"} ${s.id}: settled=${r.ok} citations=${r.citations} toolCalls=${r.toolsCalled}${hintOk ? "" : " missingHints"}`);
+    if (!r.ok || !citeOk || !hintOk) failed += 1;
   } catch (e) {
     console.error(`✖ ${s.id}: ${e.message}`);
     failed += 1;
