@@ -1,4 +1,5 @@
 import { defineOpenAPIConnection } from "eve/connections";
+import aiInferenceSpec from "../specs/ai-inference.json";
 import {
   liaraAiKeyAuth,
   liaraAiWorkspaceArg,

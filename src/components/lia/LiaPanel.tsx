@@ -9,6 +9,7 @@ import { ClarifyCard } from "./ClarifyCard";
 import { HomeState } from "./HomeState";
 import { Mascot } from "./Mascot";
 import { PlanCard } from "./PlanCard";
+import { ToolTrace } from "./ToolTrace";
 import { matchCommands, resolveCommandPrompt } from "../../lib/lia-commands";
 import type { LiaAgentHandle } from "./useLiaAgent";
 import type { LiaMessage, LiaResourceState, LiaSurface } from "./types";
@@ -55,6 +56,7 @@ export function LiaPanel({
   // Slash-command palette state: -1 = no selection.
   const [paletteIndex, setPaletteIndex] = useState(-1);
   const commandMatches = matchCommands(draft);
+  const [mode, setMode] = useState<"connected" | "demo" | "docs" | null>(null);
 
   // Lia embed (docs-site): the host page prefills the composer via
   // postMessage { type: "lia-prefill", text } — never auto-sends.
