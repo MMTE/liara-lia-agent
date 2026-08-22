@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "./dev.sh",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/start.mjs",
     "lint": "eslint"
   },
   "dependencies": {
@@ -14,14 +14,11 @@
     "ai": "^7.0.58",
     "eve": "^0.42.0",
     "framer-motion": "^11.18.2",
-    "highlight.js": "^11.12.0",
     "lucide-react": "^0.522.0",
     "next": "16.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-markdown": "^10.1.0",
-    "rehype-highlight": "^7.0.2",
-    "remark-gfm": "^4.0.1",
+    "streamdown": "^2.5.0",
     "zod": "4.4.3"
   },
   "devDependencies": {

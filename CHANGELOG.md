@@ -5,6 +5,45 @@ All notable changes to Liara Agent. Format: Keep a Changelog; dates are local.
 ## [Unreleased]
 
 ### Added
+- 2026-08-22 — Answers reference the exact docs section: the corpus now
+  carries per-chunk `anchor`s (from `<Section id>` tags in the MDX, via a
+  clean-mdx → `## title {#id}` → chunker pipeline), `search_docs`/`read_doc`
+  return `deepUrl` (`url#section-id`), citations deep-link
+  `…/route/#section-id` into the docs fork, and the system prompt requires
+  inline deep links + «منابع» on every docs answer. Corpus rebuilt
+  (5,009 chunks; 1,851 anchored).
+- 2026-08-22 — Docs fork: highlight-to-ask. Selecting text on any docs
+  page shows a floating bar «✦ پرسیدن از لیا درباره این متن» (+ copy) that
+  opens the widget with the quoted selection prefilled; the per-page ask
+  pill «پرسیدن از لیا درباره این صفحه» moved into the ✦ bubble launcher
+  (bottom-left) replacing the standalone bottom-right `AskLia.jsx`.
+- 2026-08-22 — Agent conversational style rules (instructions.md): react to
+  prior turns, never parrot the question, one clarifying question max and
+  only when it changes the action, short replies in back-and-forth chat.
+
+### Changed
+- 2026-08-22 — Markdown rendering switched to `streamdown`
+  (vercel/streamdown): memoized block rendering (no full-document flash),
+  built-in caret while streaming, Shiki code blocks with copy/download.
+  `react-markdown`/`remark-gfm`/`rehype-highlight`/`highlight.js` removed.
+- 2026-08-22 — Widget chat UX: stick-to-bottom autoscroll (never yanks the
+  user back down while reading), Eve tool traces redesigned as compact
+  one-line «thinking» elements (24px, expandable), گفت‌وگو/فعالیت tabs and
+  the ActivityView removed (chat page owns the timeline), اتصال حساب لیارا
+  is now a small plug icon in the top bar beside history/new-chat (modal
+  manages connect/disconnect), and the panel ⇄ sidebar expand works in
+  every mount (floating, /chat, docs embed via `lia-size`, extension) with
+  the preference persisted (`lia-variant`).
+
+### Fixed
+- 2026-08-22 — گفت‌وگوهای قبلی listed nothing for pre-history sessions:
+  titles now derive from the reducer projection (raw stream events have no
+  role), and the legacy `liara-agent-chat` snapshot is migrated into the
+  history list on mount.
+- 2026-08-22 — Extension `content.js` crashed with `ReferenceError: iframe
+  is not defined` on bubble click — the iframe was never created; it now
+  builds the panel + iframe (`/chat?embed=1`) and honors `lia-size`.
+
 - 2026-08-22 — The agent is Lia (لیا) — ADR-0010: renamed from the prototype
   name Liri/لیری across UI copy, embed API (`window.Lia`, `lia-prefill`),
   the docs-fork ask pill (`AskLia.jsx`) and the extension guard; character

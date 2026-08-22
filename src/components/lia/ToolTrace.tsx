@@ -1,83 +1,88 @@
 "use client";
 
-import { Check, Loader2 } from "lucide-react";
-import type { ToolKind, TraceStep } from "./types";
+import { useState } from "react";
+import { Check, ChevronDown, Loader2 } from "lucide-react";
+import type { TraceStep } from "./types";
 
-const kindLabel: Record<ToolKind, string> = {
-  read: "خواندن",
-  docs: "مستندات",
-  write: "نوشتن",
-};
-
-const faNum = (n: number) => String(n).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]);
+const faNum = (n: number) => String(n).replace(/\d/g, (d) => "۱۲۳۴۵۶۷۸۹"[Number(d)]);
 
 interface ToolTraceProps {
   steps: TraceStep[];
   variant: "inspect" | "verify";
 }
 
+/**
+ * Light "thinking" element: one compact line while the agent works (live
+ * step label), collapsing to a quiet summary line when finished. The full
+ * step list is one click away — never rendered bulky by default.
+ */
 export function ToolTrace({ steps, variant }: ToolTraceProps) {
-  const title = variant === "verify" ? "اجرا و راستی‌آزمایی" : "مراحل بررسی";
+  const [open, setOpen] = useState(false);
   const done = steps.length > 0 && steps.every((s) => s.state === "done");
-  // last step still running is the live one
   const liveIndex = steps.reduce((acc, s, i) => (s.state === "active" ? i : acc), -1);
   const doneCount = steps.filter((s) => s.state === "done").length;
+  const live = steps[liveIndex];
+  const title = variant === "verify" ? "اجرا و راستی‌آزمایی" : "بررسی";
 
   return (
-    <section
-      className="rounded-2xl border border-[var(--border)] bg-[var(--bg)]/60 p-3"
-      aria-label={`مراحل اجرای ابزار: ${title}`}
-    >
-      <header className="mb-2.5 flex items-center gap-2">
+    <section aria-label={`مراحل اجرای ابزار: ${title}`} className="text-[11.5px] leading-5">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex max-w-full items-center gap-1.5 rounded-md px-1 py-0.5 text-start text-[var(--text-dim)] transition hover:bg-[var(--bg)]/60 hover:text-[var(--text)]"
+      >
         {done ? (
-          <Check className="h-3.5 w-3.5 text-[var(--ok)]" />
+          <Check className="h-3 w-3 shrink-0 text-[var(--ok)]" />
         ) : (
-          <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--accent)]" />
+          <Loader2 className="h-3 w-3 shrink-0 animate-spin text-[var(--accent)]" />
         )}
-        <h3 className="text-[12.5px] font-medium text-[var(--text)]">{title}</h3>
-        <span className="ms-auto text-[11px] text-[var(--text-dim)]">
-          {faNum(Math.min(doneCount, steps.length))}/{faNum(steps.length)}
-        </span>
-      </header>
+        <span className="shrink-0">{title}</span>
+        {!done && live && (
+          <>
+            <span className="text-[var(--text-dim)]/60">·</span>
+            <span className="min-w-0 truncate">{live.label}</span>
+          </>
+        )}
+        {done && (
+          <>
+            <span className="text-[var(--text-dim)]/60">·</span>
+            <span className="shrink-0">{faNum(doneCount)} مرحله</span>
+          </>
+        )}
+        <ChevronDown
+          className={[
+            "ms-0.5 h-3 w-3 shrink-0 text-[var(--text-dim)] transition-transform",
+            open ? "rotate-180" : "",
+          ].join(" ")}
+        />
+      </button>
 
-      <ol className="space-y-1.5">
-        {steps.map((step, i) => {
-          const state = step.state;
-          const live = i === liveIndex && !done;
-          return (
-            <li key={`${step.tool}-${i}`}>
-              <div
-                className={[
-                  "flex items-start gap-2 rounded-lg px-2 py-1.5 transition",
-                  live ? "bg-[var(--accent-soft)]" : "",
-                ].join(" ")}
-              >
-                <span className="mt-[3px]">
-                  {state === "done" ? (
-                    <Check className="h-3.5 w-3.5 text-[var(--ok)]" />
-                  ) : (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--accent)]" />
-                  )}
+      {open && (
+        <ol className="mt-1 space-y-1 border-s border-[var(--border)] ps-3">
+          {steps.map((step, i) => (
+            <li key={`${step.tool}-${i}`} className="flex items-start gap-1.5">
+              {step.state === "done" ? (
+                <Check className="mt-1 h-2.5 w-2.5 shrink-0 text-[var(--ok)]" />
+              ) : (
+                <Loader2 className="mt-1 h-2.5 w-2.5 shrink-0 animate-spin text-[var(--accent)]" />
+              )}
+              <div className="min-w-0 flex-1">
+                <span
+                  className={[
+                    step.state === "active" ? "text-[var(--text)]" : "text-[var(--text-dim)]",
+                  ].join(" ")}
+                >
+                  {step.label}
                 </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-[12.5px] text-[var(--text)]">{step.label}</p>
-                    <code className="rounded bg-[var(--bg-raised)] px-1.5 py-px font-mono text-[10.5px] text-[var(--text-dim)]">
-                      {step.tool}
-                    </code>
-                    <span className="rounded bg-[var(--bg-raised)] px-1.5 py-px text-[10px] text-[var(--text-dim)]">
-                      {kindLabel[step.kind] ?? step.kind}
-                    </span>
-                  </div>
-                  {state === "done" && step.result && (
-                    <p className="mt-0.5 text-[11.5px] text-[var(--text-dim)]">{step.result}</p>
-                  )}
-                </div>
+                {step.state === "done" && step.result && (
+                  <span className="text-[var(--text-dim)]/70"> — {step.result}</span>
+                )}
               </div>
             </li>
-          );
-        })}
-      </ol>
+          ))}
+        </ol>
+      )}
     </section>
   );
 }

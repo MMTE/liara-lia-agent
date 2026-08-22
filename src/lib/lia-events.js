@@ -62,10 +62,13 @@ function citationsFrom(toolParts) {
     if (!String(p.toolName ?? "").includes("search_docs")) continue;
     const carrier = isObj(p.output) ? p.output : isObj(p.result) ? p.result : null;
     for (const r of (carrier && Array.isArray(carrier.results) ? carrier.results : []).filter(isObj)) {
-      if (typeof r.url !== "string" || seen.has(r.url)) continue;
-      seen.add(r.url);
+      if (typeof r.url !== "string") continue;
+      const anchor = typeof r.anchor === "string" && r.anchor ? r.anchor : null;
+      const url = anchor ? `${r.url}#${anchor}` : r.url;
+      if (seen.has(url)) continue;
+      seen.add(url);
       const m = r.url.match(/^https:\/\/docs\.liara\.ir\/(.+?)\/?$/);
-      out.push({ title: String(r.title ?? r.url), url: r.url, route: m ? m[1] : null });
+      out.push({ title: String(r.title ?? r.url), url, route: m ? m[1] : null, anchor });
     }
   }
   return out.slice(0, 8);

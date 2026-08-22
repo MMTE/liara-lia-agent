@@ -54,6 +54,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -93,6 +102,15 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
             "schema": {
               "type": "string"
             }
@@ -145,7 +163,18 @@
             "description": "Missing authentication",
             "content": {}
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       },
       "post": {
         "tags": [
@@ -193,7 +222,18 @@
             "content": {}
           }
         },
-        "x-codegen-request-body-name": "Create a databases"
+        "x-codegen-request-body-name": "Create a databases",
+        "parameters": [
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/v1/databases/{id}/actions/scale": {
@@ -209,6 +249,15 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
             "schema": {
               "type": "string"
             }
@@ -270,6 +319,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -327,6 +385,15 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
             "schema": {
               "type": "string"
             }
@@ -394,6 +461,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -429,6 +505,15 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
             "schema": {
               "type": "string"
             }
@@ -487,6 +572,15 @@
             "in": "path",
             "required": true,
             "description": "The name of your backup",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
             "schema": {
               "type": "string"
             }
@@ -550,6 +644,15 @@
                 "enable",
                 "disable"
               ]
+            }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -616,6 +719,15 @@
                 "disable"
               ]
             }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -667,6 +779,15 @@
             "required": true,
             "schema": {
               "type": "number"
+            }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -722,6 +843,15 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -775,6 +905,15 @@
             "required": true,
             "schema": {
               "type": "number"
+            }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -830,6 +969,15 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -872,6 +1020,15 @@
             "in": "path",
             "description": "The name of your database",
             "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
             "schema": {
               "type": "string"
             }
@@ -1012,6 +1169,15 @@
             "required": false,
             "schema": {
               "type": "number"
+            }
+          },
+          {
+            "name": "teamID",
+            "in": "query",
+            "required": false,
+            "description": "Liara team scope — auto-provided by the connection; not a model input.",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -1334,10 +1500,9 @@
     },
     "securitySchemes": {
       "jwt": {
-        "type": "apiKey",
-        "description": "Enter the token with the `Bearer: ` prefix, e.g. \"Bearer abcde12345\".  #",
-        "name": "Authorization",
-        "in": "header"
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Enter the token with the `Bearer: ` prefix, e.g. \"Bearer abcde12345\".  #"
       }
     }
   }

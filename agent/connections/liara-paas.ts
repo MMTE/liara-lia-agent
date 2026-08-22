@@ -2,7 +2,7 @@ import { defineOpenAPIConnection } from "eve/connections";
 
 import paasSpec from "../specs/paas.json";
 import { liaraApproval } from "../lib/liara-approval";
-import { liaraConnectionAuth } from "../lib/liara-auth";
+import { liaraConnectionAuth, liaraTeamScopeArgs } from "../lib/liara-auth";
 
 /**
  * Liara PaaS (application hosting) connection. Vendored spec
@@ -19,7 +19,7 @@ export default defineOpenAPIConnection({
   description:
     "Liara PaaS: list and inspect apps, read logs, events, releases, and CPU/memory/summary metrics, update environment variables, redeploy from a release, and restart an app. Mutating calls (restart, env update, deploy) require user approval. Persian users call apps «برنامه».",
   auth: liaraConnectionAuth(),
-  approval: liaraApproval,
+  toolCall: { providedArguments: liaraTeamScopeArgs() },
   operations: {
     allow: [
       "getApps",

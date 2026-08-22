@@ -14,9 +14,8 @@ export const MAX_CHUNK = 1200;
  * @property {string} slug
  * @property {string} url
  * @property {string} title
- * @property {string} product
- * @property {string} source
  * @property {string} sectionPath
+ * @property {string | null} anchor nearest preceding explicit section id
  * @property {string} text
  */
 
@@ -103,24 +102,35 @@ export function chunkPage(page) {
   const lines = (text ?? "").replace(/\r\n?/g, "\n").split("\n");
 
   // Group lines into sections at H2/H3 headings (H3 nests under current H2).
-  /** @type {{path: string, heading: string | null, body: string[]}[]} */
+  /** @type {{path: string, heading: string | null, body: string[], anchor: string | null}[]} */
   const sections = [];
   let h2 = "";
-  let cur = { path: "", heading: null, body: [] };
+  // Explicit section anchor (from `## title {#id}` markers); a Section id
+  // anchors every following chunk until the next Section on the page.
+  let anchor = null;
+  let cur = { path: "", heading: null, body: [], anchor: null };
   const pushSection = () => {
     if (cur.body.some((l) => l.trim() !== "") || cur.heading) sections.push(cur);
-    cur = { path: "", heading: null, body: [] };
+    cur = { path: "", heading: null, body: [], anchor: null };
   };
   for (const line of lines) {
     const m = line.match(/^(#{2,3})\s+(.*\S)\s*$/);
     if (m) {
       pushSection();
-      const name = m[2].trim();
+      let name = m[2].trim();
+      // <Section id="…"/> anchors arrive as `## title {#id}` markers
+      // (clean-mdx). The id anchors everything until the next Section.
+      const am = name.match(/\{#([\w-]+)\}\s*$/);
+      if (am) {
+        anchor = am[1];
+        name = name.slice(0, am.index).trim();
+      }
       if (m[1].length === 2) h2 = name;
       cur = {
         path: m[1].length === 2 ? name : [h2, name].filter(Boolean).join(" > "),
-        heading: m[0].trim(),
+        heading: `${m[1]} ${name}`,
         body: [],
+        anchor,
       };
     } else {
       cur.body.push(line);
@@ -132,7 +142,7 @@ export function chunkPage(page) {
   const chunks = [];
   // Heading-only sections (H2 directly followed by H3) merge forward.
   const pendingHeadings = [];
-  const addChunk = (sectionPath, chunkText) => {
+  const addChunk = (sectionPath, chunkAnchor, chunkText) => {
     chunks.push({
       id: `${slug}#${chunks.length}`,
       slug,
@@ -141,6 +151,7 @@ export function chunkPage(page) {
       product,
       source,
       sectionPath,
+      anchor: chunkAnchor,
       text: chunkText,
     });
   };
@@ -155,12 +166,12 @@ export function chunkPage(page) {
         i === 0
           ? [...pendingHeadings, section.heading].filter(Boolean).join("\n\n")
           : "";
-      addChunk(section.path, prefix ? `${prefix}\n\n${chunkText}` : chunkText);
+      addChunk(section.path, section.anchor, prefix ? `${prefix}\n\n${chunkText}` : chunkText);
     });
     pendingHeadings.length = 0;
   }
   if (pendingHeadings.length) {
-    addChunk(sections.at(-1)?.path ?? "", pendingHeadings.join("\n\n"));
+    addChunk(sections.at(-1)?.path ?? "", sections.at(-1)?.anchor ?? null, pendingHeadings.join("\n\n"));
   }
   return chunks;
 }

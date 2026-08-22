@@ -12,17 +12,24 @@ export interface Chunk {
   product: string;
   source: string;
   sectionPath: string;
+  /** explicit section id on the docs page (deep-link anchor), when known */
+  anchor?: string | null;
   text: string;
 }
 
 export interface DocHit {
   title: string;
   url: string;
+  /** `url#anchor` deep link to the exact section (equals url when no anchor) */
+  deepUrl: string;
   slug: string;
   source: string;
+  /** explicit section id for deep linking (null when the page has none) */
+  anchor: string | null;
   snippet: string;
   score: number;
 }
+
 
 interface CorpusFile {
   meta: Record<string, unknown>;
@@ -125,8 +132,10 @@ export async function searchDocs(query: string, k = 6): Promise<DocHit[]> {
     hits.push({
       title: c.title,
       url: c.url,
+      deepUrl: c.anchor ? `${c.url}#${c.anchor}` : c.url,
       slug: c.slug,
       source: c.source,
+      anchor: c.anchor ?? null,
       snippet: snippet(c.text),
       score,
     });
@@ -134,16 +143,24 @@ export async function searchDocs(query: string, k = 6): Promise<DocHit[]> {
   return hits;
 }
 
-export function readDoc(slug: string, maxChars = 12_000): string | null {
+export function readDoc(slug: string, maxChars = 12_000): { text: string; url: string; anchor: string | null } | null {
   warm();
   const page = chunks.filter((c) => c.slug === slug || c.url.endsWith(slug));
   if (page.length === 0) return null;
   const body = page
     .slice()
     .sort((a, b) => a.sectionPath.localeCompare(b.sectionPath))
-    .map((c) => `## ${c.title}${c.sectionPath ? ` — ${c.sectionPath}` : ""}\n\n${c.text}`)
+    .map(
+      (c) =>
+        `## ${c.title}${c.sectionPath ? ` — ${c.sectionPath}` : ""}${c.anchor ? ` {#${c.anchor}}` : ""}\n\n${c.text}`,
+    )
     .join("\n\n---\n\n");
-  return body.length > maxChars ? `${body.slice(0, maxChars)}\n\n… (بریده شد)` : body;
+  const first = page[0];
+  return {
+    text: body.length > maxChars ? `${body.slice(0, maxChars)}\n\n… (بریده شد)` : body,
+    url: first.url,
+    anchor: first.anchor ?? null,
+  };
 }
 
 export function corpusStats(): { chunks: number; semantic: boolean } {

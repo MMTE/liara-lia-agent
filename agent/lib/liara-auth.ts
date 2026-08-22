@@ -1,6 +1,7 @@
 import type {
   ConnectionAuthDefinition,
   ConnectionPrincipal,
+  ProvidedArgumentContext,
   TokenResult,
 } from "eve/connections";
 import { getForPrincipal } from "../../src/lib/session-store.js";
@@ -37,6 +38,24 @@ async function getToken({ principal }: {
  * across callers), everyone else gets an app-scoped provider that resolves
  * the demo token.
  */
+/**
+ * Team scope for demo/app-principal calls (see scripts/vendor-liara-specs.mjs):
+ * the platform API needs ?teamID= for tokens that are not team-bound
+ * server-side — the built-in demo token is personal-scope, so without the
+ * param it sees an empty account. Connected-user sessions carry their own
+ * scope server-side and get no param (`undefined` omits the query).
+ */
+export function liaraTeamScopeArgs() {
+  return {
+    // null (not undefined) satisfies JsonValue; the runtime skips the query
+    // parameter for nullish provided values either way.
+    teamID: (ctx: ProvidedArgumentContext): string | null =>
+      ctx.session.auth.current?.principalType === "user" || !process.env.LIARA_TEAM_ID
+        ? null
+        : process.env.LIARA_TEAM_ID,
+  };
+}
+
 export function liaraConnectionAuth(): ConnectionAuthDefinition {
   return (ctx) =>
     ctx.session.auth.current?.principalType === "user"

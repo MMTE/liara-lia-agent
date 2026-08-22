@@ -16,9 +16,11 @@ interface MascotProps {
   size?: number;
   float?: boolean;
   className?: string;
+  /** override the mood badge, e.g. the animated wave GIF */
+  src?: string;
 }
 
-export function Mascot({ mood = "idle", size = 40, float = false, className = "" }: MascotProps) {
+export function Mascot({ mood = "idle", size = 40, float = false, className = "", src }: MascotProps) {
   const avatar = (
     <span
       className={[
@@ -28,7 +30,7 @@ export function Mascot({ mood = "idle", size = 40, float = false, className = ""
       style={{ width: size, height: size }}
     >
       <img
-        src={BADGE[mood]}
+        src={src ?? BADGE[mood]}
         alt="لیا، دستیار عملیاتی لیارا"
         className="h-full w-full object-cover"
       />

@@ -13,7 +13,21 @@ const SELF_CLOSING_TAG = new RegExp(
   `<([A-Za-z][\\w.:-]*)${ATTRS}/>`,
   "g",
 );
+// <Section id="x" title="t" /> (docs-site section anchor) → markdown H2 with
+// a {#id} marker. The chunker turns the marker into a chunk `anchor` so
+// citations can deep-link to the exact section (page + #id).
+const SECTION_TAG = new RegExp(`<Section\\b${ATTRS}(/?)>`, "g");
+
+/** @param {string} attrs */
+function sectionHeading(attrs) {
+  const id = attrs.match(/\bid\s*=\s*["']([\w-]+)["']/)?.[1];
+  const title = attrs.match(/\btitle\s*=\s*["']([^"']*)["']/)?.[1]?.trim();
+  if (!id && !title) return "";
+  return `\n\n## ${title || id}${id ? ` {#${id}}` : ""}\n\n`;
+}
+
 const JSX_HEADING = /<h([1-6])((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<\/h\1\s*>/gi;
+
 // Structural residue lines: only JSX/JS punctuation left after tag removal.
 const STRUCTURE_ONLY = /^[\s()<>\[\]{},;/`'"]+$/;
 const ATTR_NOISE = /^\s*(?:step|content|tabs)\s*:\s*[^\n]*$/;
@@ -99,10 +113,22 @@ export function cleanMdx(raw) {
   s = s.replace(/^[ \t]*import\s[^\n]*$/gm, ""); // single-line imports
   s = s.replace(/<Head\b[^>]*>[\s\S]*?<\/Head\s*>/gi, ""); // <Head> blocks
   s = s.replace(/\{\/\*[\s\S]*?\*\/\}/g, ""); // JSX comments
+  // Sections first (paired innermost-out, then self-closing) — before payload
+  // hoisting, so Sections nested inside attribute payloads convert too.
+  // Paired children are kept as the heading's body text.
+  const pairedSection = new RegExp(
+    `<Section\\b${ATTRS}>((?:(?!<Section\\b)[\\s\\S])*)</Section\\s*>`,
+    "g",
+  );
+  for (let i = 0; i < 50; i++) {
+    const before = s;
+    s = s.replace(pairedSection, (_m, attrs, inner) => `${sectionHeading(attrs)}${inner}`);
+    if (s === before) break;
+  }
+  s = s.replace(SECTION_TAG, (_m, attrs) => sectionHeading(attrs));
   s = s.replace(JSX_HEADING, (_, lvl, _attrs, inner) => `\n${"#".repeat(Number(lvl))} ${inner.trim()}\n`);
   s = s.replace(/\{`([^`]*)`\}/g, "$1"); // {`code`} → code
   s = hoistPayloadAttrs(s); // rescue sections inside self-closing attr payloads
-
   // Strip JSX tags innermost-out until stable (fragments, paired, self-closing).
   for (let i = 0; i < 200; i++) {
     const before = s;

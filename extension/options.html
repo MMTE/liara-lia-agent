@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <title>تنظیمات لیا</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: #121212;
+        color: #e6edf3;
+        display: flex;
+        justify-content: center;
+      }
+      .card {
+        margin-top: 48px;
+        width: min(480px, calc(100vw - 32px));
+        background: #1e1e1e;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 20px;
+      }
+      h1 { font-size: 15px; margin: 0 0 4px; }
+      p { font-size: 12px; color: #9aa4b2; margin: 0 0 14px; line-height: 1.8; }
+      label { font-size: 12px; color: #9aa4b2; display: block; margin-bottom: 6px; }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        direction: ltr;
+        font-family: ui-monospace, monospace;
+        font-size: 12.5px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: #121212;
+        color: #e6edf3;
+        outline: none;
+      }
+      input:focus { border-color: #00d4ff; }
+      .row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+      button {
+        border: none;
+        border-radius: 999px;
+        background: #00d4ff;
+        color: #0c1214;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 20px;
+        cursor: pointer;
+      }
+      button:disabled { opacity: 0.4; cursor: default; }
+      #status { font-size: 12px; color: #3fb950; min-height: 18px; }
+      .err { color: #f85149 !important; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>لیا — ایجنت ابری لیارا</h1>
+      <p>
+        نشانی اپ ایجنت که حباب لیا باز می‌کند. پیش‌فرض روی استقرار رسمی تنظیم است؛ فقط اگر
+        نسخه‌ی خودتان را دیپلوی کرده‌اید تغییرش دهید.
+      </p>
+      <label for="url">نشانی ایجنت (Agent URL)</label>
+      <input id="url" type="url" dir="ltr" placeholder="https://liara-lia-agent.iran.liara.ir" />
+      <div class="row">
+        <button id="save">ذخیره</button>
+        <span id="status"></span>
+      </div>
+    </div>
+    <script src="options.js"></script>
+  </body>
+</html>

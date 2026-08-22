@@ -84,12 +84,8 @@ test("parsePatches: entry without a baseline span parses to baseline null", () =
 
 test("parsePatches: shipped docs-site/PATCHES.md parses to the shipped Lia patches", () => {
   const entries = parsePatches(readFileSync(path.join(REPO, "docs-site", "PATCHES.md"), "utf8"));
-  assert.deepEqual(entries.map((e) => e.targets), [
-    ["src/pages/_app.js"],
-    ["src/components/AskLia.jsx"],
-  ]);
+  assert.deepEqual(entries.map((e) => e.targets), [["src/pages/_app.js"]]);
   assert.match(entries[0].baseline ?? "", /^[0-9a-f]{64}$/); // modified upstream file
-  assert.equal(entries[1].baseline, "none"); // patch-added file
 });
 
 // --- verifyPatches: modified-file patches -------------------------------------

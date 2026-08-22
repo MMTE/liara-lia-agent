@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, RotateCcw, Square, X } from "lucide-react";
+import { ArrowUp, History, Minimize2, Maximize2, RotateCcw, Square, Trash2, X } from "lucide-react";
 import UsageMeter from "../UsageMeter";
-import AboutModal from "../AboutModal";
 import ConnectPanel from "../ConnectPanel";
-import { ActivityView } from "./ActivityView";
 import { AnswerCard } from "./AnswerCard";
 import { ClarifyCard } from "./ClarifyCard";
 import { HomeState } from "./HomeState";
@@ -24,13 +22,35 @@ interface LiaPanelProps {
   agent: LiaAgentHandle;
   /** standalone /chat mount: panel fills the viewport, no floating chrome, no close button */
   fullPage?: boolean;
+  /** floating corner panel (default) vs full-height sidebar (expand toggle) */
+  variant?: "panel" | "sidebar";
+  onToggleVariant?: () => void;
+  /** restore a stored conversation (LiaWidget remounts the hook with it) */
+  onOpenChat?: (id: string) => void;
   onClose?: () => void;
 }
 
-export function LiaPanel({ surface, scopeLabel, resource, detail, state, agent, fullPage, onClose }: LiaPanelProps) {
-  const [view, setView] = useState<"chat" | "activity">("chat");
+const timeFmt = new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium", timeStyle: "short" });
+
+export function LiaPanel({
+  surface,
+  scopeLabel,
+  resource,
+  detail,
+  state,
+  agent,
+  fullPage,
+  variant = "panel",
+  onToggleVariant,
+  onOpenChat,
+  onClose,
+}: LiaPanelProps) {
+  const [view, setView] = useState<"chat" | "history">("chat");
   const [draft, setDraft] = useState("");
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // Stick-to-bottom: follow the stream only while the user is at (or near)
+  // the bottom. Once they scroll up to read, never yank them back down.
+  const stickRef = useRef(true);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const [mode, setMode] = useState<"connected" | "demo" | "docs" | null>(null);
 
@@ -69,8 +89,19 @@ export function LiaPanel({ surface, scopeLabel, resource, detail, state, agent, 
     return () => window.removeEventListener("message", onMessage);
   }, []);
 
+  const onScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    stickRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 90;
+  };
+
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const el = scrollRef.current;
+    if (!el || !stickRef.current) return;
+    // Already pinned (e.g. browser kept position as content grew)? Skip the
+    // write — it would only trigger another scroll event.
+    if (Math.abs(el.scrollTop + el.clientHeight - el.scrollHeight) <= 4) return;
+    el.scrollTop = el.scrollHeight;
   }, [agent.messages, agent.status, view]);
 
   // auto-grow composer
@@ -83,6 +114,8 @@ export function LiaPanel({ surface, scopeLabel, resource, detail, state, agent, 
 
   const submit = () => {
     if (draft.trim().length === 0 || agent.isBusy) return;
+    // Sending implies "jump to the new turn" — re-arm the follow.
+    stickRef.current = true;
     agent.ask(draft);
     setDraft("");
   };
@@ -140,16 +173,21 @@ export function LiaPanel({ surface, scopeLabel, resource, detail, state, agent, 
     }
   };
 
+  const shell =
+    fullPage
+      ? variant === "sidebar"
+        ? "pointer-events-auto flex h-full w-full max-w-6xl flex-col overflow-hidden bg-[var(--bg-raised)] text-[var(--text)]"
+        : "pointer-events-auto flex h-full w-full max-w-4xl flex-col overflow-hidden bg-[var(--bg-raised)] text-[var(--text)]"
+      : variant === "sidebar"
+        ? "pointer-events-auto flex h-full w-[min(100vw,30rem)] flex-col overflow-hidden bg-[var(--bg-raised)] text-[var(--text)] shadow-2xl shadow-black/50"
+        : "pointer-events-auto flex max-h-[min(78vh,660px)] w-[min(100vw-1.5rem,27.5rem)] flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text)] shadow-2xl shadow-black/40";
+
   return (
     <div
-      role={fullPage ? undefined : "dialog"}
+      role={fullPage || variant === "sidebar" ? undefined : "dialog"}
       aria-label="لیا، دستیار عملیاتی لیارا"
       dir="rtl"
-      className={
-        fullPage
-          ? "pointer-events-auto flex h-full w-full max-w-4xl flex-col overflow-hidden bg-[var(--bg-raised)] text-[var(--text)]"
-          : "pointer-events-auto flex max-h-[min(78vh,660px)] w-[min(100vw-1.5rem,27.5rem)] flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text)] shadow-2xl shadow-black/40"
-      }
+      className={shell}
     >
       <header className="flex items-center gap-2.5 border-b border-[var(--border)] px-3 py-2.5">
         <Mascot mood={agent.mood} size={32} />
@@ -158,37 +196,40 @@ export function LiaPanel({ surface, scopeLabel, resource, detail, state, agent, 
           <p className="text-[11px] leading-tight text-[var(--text-dim)]">
             {mode === "connected"
               ? "متصل به حساب شما"
-              : mode === "demo"
-                ? "حالت دمو"
-                : surface === "docs"
-                  ? "دستیار مستندات لیارا"
-                  : "اپراتور عملیاتی لیارا"}
+              : surface === "docs"
+                ? "دستیار مستندات لیارا"
+                : "اپراتور عملیاتی لیارا"}
           </p>
         </div>
 
         <div className="ms-auto flex items-center gap-1">
-          <div className="flex rounded-lg bg-[var(--bg)] p-0.5" role="tablist" aria-label="نمای پنل">
-            {(["chat", "activity"] as const).map((v) => (
-              <button
-                key={v}
-                type="button"
-                role="tab"
-                aria-selected={view === v}
-                onClick={() => setView(v)}
-                className={[
-                  "rounded-md px-2.5 py-1 text-[11.5px] transition",
-                  view === v ? "bg-[var(--bg-raised)] text-[var(--text)]" : "text-[var(--text-dim)] hover:text-[var(--text)]",
-                ].join(" ")}
-              >
-                {v === "chat" ? "گفت‌وگو" : "فعالیت"}
-              </button>
-            ))}
-          </div>
-          <AboutModal />
+          <ConnectPanel variant="compact" onChanged={handleModeChange} />
+          <button
+            type="button"
+            onClick={() => setView(view === "history" ? "chat" : "history")}
+            aria-label="گفت‌وگوهای قبلی"
+            aria-pressed={view === "history"}
+            title="گفت‌وگوهای قبلی"
+            className="rounded-lg p-1.5 text-[var(--text-dim)] transition hover:bg-[var(--bg)] hover:text-[var(--text)]"
+          >
+            <History className="h-4 w-4" />
+          </button>
+          {onToggleVariant && (
+            <button
+              type="button"
+              onClick={onToggleVariant}
+              aria-label={variant === "sidebar" ? "بازگرداندن به حالت پنجره" : "باز کردن به‌صورت سایدبار"}
+              title={variant === "sidebar" ? "بازگرداندن به حالت پنجره" : "باز کردن به‌صورت سایدبار"}
+              className="rounded-lg p-1.5 text-[var(--text-dim)] transition hover:bg-[var(--bg)] hover:text-[var(--text)]"
+            >
+              {variant === "sidebar" ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </button>
+          )}
           <button
             type="button"
             onClick={agent.reset}
             aria-label="گفت‌وگوی جدید"
+            title="گفت‌وگوی جدید"
             className="rounded-lg p-1.5 text-[var(--text-dim)] transition hover:bg-[var(--bg)] hover:text-[var(--text)]"
           >
             <RotateCcw className="h-4 w-4" />
@@ -206,6 +247,7 @@ export function LiaPanel({ surface, scopeLabel, resource, detail, state, agent, 
         </div>
       </header>
 
+      {(resource || detail || state) && (
       <div className="flex items-center gap-2 border-b border-[var(--border)] bg-[var(--bg)]/50 px-3 py-2 text-[11.5px]">
         <span className="shrink-0 rounded-md bg-[var(--bg-raised)] px-1.5 py-0.5 text-[var(--text-dim)]">{scopeLabel}</span>
         {resource && (
@@ -226,20 +268,60 @@ export function LiaPanel({ surface, scopeLabel, resource, detail, state, agent, 
             سالم
           </span>
         )}
-        <div className="ms-auto shrink-0">
-          <ConnectPanel onChanged={handleModeChange} />
-        </div>
       </div>
+      )}
 
-      <div className="flex-1 overflow-y-auto">
-        {view === "activity" ? (
-          <ActivityView messages={agent.messages} />
+      <div ref={scrollRef} onScroll={onScroll} className="flex-1 overflow-y-auto">
+        {view === "history" ? (
+          <div className="p-3" dir="rtl">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[12.5px] font-semibold text-[var(--text)]">گفت‌وگوهای قبلی</p>
+              <button
+                type="button"
+                onClick={() => {
+                  agent.reset();
+                  setView("chat");
+                }}
+                className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[11.5px] text-[var(--text-dim)] transition hover:text-[var(--text)]"
+              >
+                گفت‌وگوی جدید
+              </button>
+            </div>
+            {agent.history.length === 0 ? (
+              <p className="px-1 py-8 text-center text-[12.5px] leading-6 text-[var(--text-dim)]">
+                هنوز گفت‌وگویی ثبت نشده است. بعد از اولین پرسش، همین‌جا فهرست می‌شود.
+              </p>
+            ) : (
+              <ul className="space-y-1.5">
+                {agent.history.map((chat) => (
+                  <li key={chat.id} className="group flex items-stretch gap-1">
+                    <button
+                      type="button"
+                      onClick={() => onOpenChat?.(chat.id)}
+                      className="min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--bg)]/40 px-3 py-2 text-start transition hover:border-[var(--accent)]"
+                    >
+                      <span className="block truncate text-[12.5px] text-[var(--text)]">{chat.title}</span>
+                      <span className="mt-0.5 block text-[10.5px] text-[var(--text-dim)]">{timeFmt.format(chat.updatedAt)}</span>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="حذف گفت‌وگو"
+                      title="حذف گفت‌وگو"
+                      onClick={() => agent.forgetChat(chat.id)}
+                      className="rounded-xl px-2 text-[var(--text-dim)] opacity-0 transition hover:text-[var(--err)] focus:opacity-100 group-hover:opacity-100"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         ) : agent.messages.length === 0 ? (
           <HomeState scopeLabel={scopeLabel} resource={resource} detail={detail} state={state} onAsk={agent.ask} />
         ) : (
           <div className="space-y-3.5 p-3">
             {agent.messages.map(renderMessage)}
-            <div ref={bottomRef} />
           </div>
         )}
       </div>

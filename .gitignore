@@ -32,3 +32,6 @@ next-env.d.ts
 
 # Lia character mascot raw assets (ADR-0010) — only 512px derivatives in public/lia/ ship
 lia-picture-assets/
+
+# eve nitro production output (prebuilt at deploy; see scripts/start.mjs)
+.output/

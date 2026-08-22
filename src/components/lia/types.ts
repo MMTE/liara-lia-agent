@@ -20,6 +20,8 @@ export interface LiaCitation {
   url: string;
   /** docs.liara.ir path without origin (null for external urls) */
   route: string | null;
+  /** explicit section id on the page — deep-links the exact section */
+  anchor: string | null;
 }
 
 export interface HitlOption {

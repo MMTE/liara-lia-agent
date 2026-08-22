@@ -2,7 +2,7 @@ import { defineAgent } from "eve";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { LanguageModel } from "ai";
 
-// Provider selection: CHAT_PROVIDER=vercel|blackbox|liara|openrouter|openai,
+// Provider selection: CHAT_PROVIDER=vercel|blackbox|liara|avalai|openrouter|openai,
 // optional CHAT_MODEL override. Gateway ids are strings; OpenAI-compatible
 // providers get provider objects. Resolved once at module load.
 const provider = process.env.CHAT_PROVIDER || "vercel";
@@ -12,6 +12,16 @@ function resolveModel(): string | LanguageModel {
   switch (provider) {
     case "blackbox":
       return chatModel ?? "zai/glm-5.2";
+    case "avalai": {
+      // Iranian OpenAI-compatible aggregator (api.avalai.ir) — the default
+      // for the Liara-hosted deployment: reachable from Iranian egress.
+      const avalai = createOpenAICompatible({
+        name: "avalai",
+        baseURL: process.env.AVALAI_BASE_URL ?? "https://api.avalai.ir/v1",
+        apiKey: process.env.AVALAI_API_KEY,
+      });
+      return avalai.chatModel(chatModel ?? "gpt-5.6-sol");
+    }
     case "liara": {
       const liara = createOpenAICompatible({
         name: "liara-ai",
