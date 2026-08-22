@@ -113,7 +113,7 @@ async function uploadSource(tarPath) {
 
 function runtimeEnvs() {
   const envs = {};
-  for (const key of ["CHAT_PROVIDER", "CHAT_MODEL", "AVALAI_API_KEY", "AVALAI_BASE_URL", "AI_GATEWAY_API_KEY", "OPENROUTER_API_KEY", "LIARA_API_BASE", "DEMO_LIARA_TOKEN", "LIARA_TEAM_ID"]) {
+  for (const key of ["CHAT_PROVIDER", "CHAT_MODEL", "CHAT_MODEL_CHAIN", "AVALAI_API_KEY", "AVALAI_BASE_URL", "LIARA_AI_API_KEY", "LIARA_AI_WORKSPACE_ID", "LIARA_AI_BASE_URL", "AI_GATEWAY_API_KEY", "OPENROUTER_API_KEY", "LIARA_API_BASE", "DEMO_LIARA_TOKEN", "LIARA_TEAM_ID"]) {
     const v = process.env[key] || dotenv[key];
     if (v) envs[key] = v;
   }
