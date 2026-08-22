@@ -369,7 +369,7 @@ export function LiaPanel({
                 type="submit"
                 disabled={draft.trim().length === 0}
                 aria-label="ارسال"
-                className="mb-[5px] flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-[#0c1214] transition disabled:opacity-30"
+                className="mb-[5px] flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-[#10141f] transition disabled:opacity-30"
               >
                 <ArrowUp className="h-4 w-4" />
               </button>

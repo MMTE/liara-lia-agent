@@ -2,31 +2,34 @@
 @source "../../node_modules/streamdown/dist/*.js";
 
 :root {
-  /* Liara palette (ADR-0010 §4): dashboard cyan accent + neutral surfaces */
-  --bg: #121212;
-  --bg-raised: #1e1e1e;
-  --bg-bubble-user: #2a2a2a;
-  --bg-bubble-agent: #1e1e1e;
-  --border: #2e2e2e;
-  --text: #eeeeee;
-  --text-dim: #b1b6be;
-  --accent: #00d4ff;
-  --accent-soft: #00d4ff1f;
-  --ok: #4ade80;
-  --warn: #fbbf24;
-  --err: #f87171;
+  /* Liara palette — extracted from the Liara dashboard (main.d4e05fcd.js +
+   * saved console DOM): navy-slate surfaces, mint→sky brand gradient
+   * (#87FCC4 → #28C1F5), sky-blue accent/links, amber warnings. */
+  --bg: #151722;
+  --bg-raised: #23252d;
+  --bg-bubble-user: #2c2e37;
+  --bg-bubble-agent: #23252d;
+  --border: #2c333f;
+  --text: #eef1f8;
+  --text-dim: #a9b1c2;
+  --accent: #28c1f5;
+  --accent-2: #87fcc4;
+  --accent-soft: #28c1f51f;
+  --ok: #87fcc4;
+  --warn: #ffc44e;
+  --err: #ff706f;
 
-  /* Streamdown (shadcn-style) tokens, mapped onto the Liara dark palette */
-  --background: #1a1a1a;
+  /* Streamdown (shadcn-style) tokens, mapped onto the Liara palette */
+  --background: #1b1e29;
   --foreground: var(--text);
-  --card: #1e1e1e;
+  --card: #23252d;
   --card-foreground: var(--text);
-  --muted: #262626;
+  --muted: #2c2e37;
   --muted-foreground: var(--text-dim);
-  --sidebar: #1a1a1a;
+  --sidebar: #1b1e29;
   --sidebar-foreground: var(--text);
   --primary: var(--accent);
-  --primary-foreground: #0c1214;
+  --primary-foreground: #10141f;
   --radius: 0.625rem;
 }
 
@@ -66,7 +69,7 @@ code, pre, kbd {
 }
 
 :not(pre) > code {
-  background: #262626;
+  background: #2c2e37;
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 1px 6px;
@@ -83,13 +86,13 @@ code, pre, kbd {
 .md a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 .md table { border-collapse: collapse; margin: 0.6em 0; font-size: 0.92em; display: block; overflow-x: auto; }
 .md :is(th, td) { border: 1px solid var(--border); padding: 5px 10px; text-align: start; }
-.md th { background: #262626; }
+.md th { background: #2c2e37; }
 .md blockquote { border-inline-start: 3px solid var(--accent); padding-inline-start: 12px; color: var(--text-dim); margin: 0.6em 0; }
 .md hr { border-color: var(--border); margin: 1em 0; }
 
 /* thin scrollbars */
 *::-webkit-scrollbar { width: 8px; height: 8px; }
-*::-webkit-scrollbar-thumb { background: #383838; border-radius: 4px; }
+*::-webkit-scrollbar-thumb { background: #333540; border-radius: 4px; }
 *::-webkit-scrollbar-track { background: transparent; }
 
 @keyframes pulse-dot {

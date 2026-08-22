@@ -178,7 +178,7 @@ export default function ConnectPanel({
                     type="button"
                     disabled={busy || token.trim().length < 16}
                     onClick={() => void connect()}
-                    className="rounded-lg bg-[var(--accent)] px-4 py-1.5 text-[13px] font-bold text-[#0c1214] disabled:opacity-40"
+                    className="rounded-lg bg-[var(--accent)] px-4 py-1.5 text-[13px] font-bold text-[#10141f] disabled:opacity-40"
                   >
                     {busy ? "در حال اتصال…" : "اتصال"}
                   </button>

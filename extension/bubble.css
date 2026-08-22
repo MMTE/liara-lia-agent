@@ -8,12 +8,12 @@
   border-radius: 50%;
   border: none;
   cursor: pointer;
-  background: linear-gradient(135deg, #00d4ff, #00a8cc);
-  color: #0c1214;
+  background: linear-gradient(135deg, #87fcc4, #28c1f5);
+  color: #10141f;
   font-size: 24px;
   line-height: 52px;
   text-align: center;
-  box-shadow: 0 4px 18px rgba(0, 212, 255, 0.35);
+  box-shadow: 0 4px 18px rgba(40, 193, 245, 0.35);
   transition: transform 0.15s ease;
   overflow: hidden;
   padding: 0;
@@ -32,7 +32,7 @@
   overflow: hidden;
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
   direction: rtl;
-  background: #1e1e1e;
+  background: #23252d;
   display: flex;
   flex-direction: column;
 }
@@ -54,7 +54,7 @@
   justify-content: space-between;
   height: 38px;
   padding: 0 8px 0 12px;
-  background: #161b1e;
+  background: #23252d;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 #liara-agent-strip span {
@@ -66,7 +66,7 @@
   flex: 1 1 auto;
   width: 100%;
   border: 0;
-  background: #121212;
+  background: #151722;
 }
 #liara-agent-close {
   width: 28px;

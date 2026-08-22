@@ -213,7 +213,7 @@ export function LiaWidget({ surface, scopeLabel, resource, detail, state, reques
                 setShowNudge(false);
                 setOpen(true);
               }}
-              className="mt-2.5 w-full rounded-xl bg-[var(--accent)] py-1.5 text-[12.5px] font-medium text-[#0c1214] transition hover:opacity-90"
+              className="mt-2.5 w-full rounded-xl bg-[var(--accent)] py-1.5 text-[12.5px] font-medium text-[#10141f] transition hover:opacity-90"
             >
               {nudge.cta}
             </button>
