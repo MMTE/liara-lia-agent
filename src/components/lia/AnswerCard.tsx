@@ -14,7 +14,34 @@ function shortTitle(t: string): string {
     .trim() || t;
 }
 
-/** Keep docs.liara.ir citations inside the vendored docs fork when its origin is configured. */
+/** Persian UI strings for Streamdown's chrome (link modal, code/table
+ *  controls) — the defaults are English. Format names stay Latin. */
+const FA = {
+  close: "بستن",
+  copied: "کپی شد",
+  copyCode: "کپی کد",
+  copyLink: "کپی لینک",
+  copyTable: "کپی جدول",
+  copyTableAsCsv: "کپی جدول به CSV",
+  copyTableAsMarkdown: "کپی جدول به Markdown",
+  copyTableAsTsv: "کپی جدول به TSV",
+  downloadDiagram: "دانلود نمودار",
+  downloadDiagramAsMmd: "دانلود نمودار به MMD",
+  downloadDiagramAsPng: "دانلود نمودار به PNG",
+  downloadDiagramAsSvg: "دانلود نمودار به SVG",
+  downloadFile: "دانلود فایل",
+  downloadImage: "دانلود تصویر",
+  downloadTable: "دانلود جدول",
+  downloadTableAsCsv: "دانلود جدول به CSV",
+  downloadTableAsMarkdown: "دانلود جدول به Markdown",
+  exitFullscreen: "خروج از تمام‌صفحه",
+  externalLinkWarning: "در حال انتقال به یک وب‌سایت خارجی هستید.",
+  imageNotAvailable: "تصویر در دسترس نیست",
+  openExternalLink: "باز کردن لینک خارجی؟",
+  openLink: "باز کردن لینک",
+  viewFullscreen: "نمایش تمام‌صفحه",
+} as const;
+
 function citationHref(c: LiaCitation): string {
   if (DOCS_SITE_ORIGIN && c.route) {
     return `${DOCS_SITE_ORIGIN}/${c.route}${c.anchor ? `/#${c.anchor}` : ""}`;
@@ -40,7 +67,7 @@ export function AnswerCard({ text, citations, streaming = false }: AnswerCardPro
           <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
         </span>
       )}
-      <Streamdown animated isAnimating={streaming}>
+      <Streamdown animated isAnimating={streaming} translations={FA}>
         {text || ""}
       </Streamdown>
       {citations.length > 0 && (
